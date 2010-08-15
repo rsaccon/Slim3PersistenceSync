@@ -17,7 +17,6 @@ public class MarkAllDoneController extends Controller {
     public Navigation run() throws Exception {
         Iterator<Task> iterator = Datastore.query(Task.class).asList().iterator();
         while(iterator.hasNext()){
-            System.out.println();
             Task task = (Task) iterator.next(); 
             task.setDone(true);
             task.put();

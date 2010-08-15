@@ -5,6 +5,8 @@ import java.util.Date;
 
 import com.google.appengine.api.datastore.Key;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.slim3.datastore.Attribute;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.InverseModelListRef;
@@ -38,6 +40,7 @@ public class Project implements Serializable {
      *
      * @return the key
      */
+    @JsonIgnore
     public Key getKey() {
         return key;
     }
@@ -48,6 +51,7 @@ public class Project implements Serializable {
      * @param key
      *            the key
      */
+    @JsonIgnore
     public void setKey(Key key) {
         this.key = key;
     }
@@ -57,6 +61,7 @@ public class Project implements Serializable {
      *
      * @return the version
      */
+    @JsonIgnore
     public Long getVersion() {
         return version;
     }
@@ -67,6 +72,7 @@ public class Project implements Serializable {
      * @param version
      *            the version
      */
+    @JsonIgnore
     public void setVersion(Long version) {
         this.version = version;
     }
@@ -112,6 +118,7 @@ public class Project implements Serializable {
         return name;
     }
 
+    @JsonIgnore
     public InverseModelListRef<Task, Project> getProjectListRef() {
         return projectListRef;
     }
@@ -130,5 +137,10 @@ public class Project implements Serializable {
             _dirty = false;
         }
         return Datastore.put(this);
-    } 
+    }
+    
+    @JsonProperty
+    public Long id() {
+        return key.getId();
+    }
 }
