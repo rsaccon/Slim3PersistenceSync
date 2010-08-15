@@ -19,7 +19,6 @@ public class TaskUpdatesController extends Controller {
     @Override
     public Navigation run() throws Exception {
         response.setContentType("application/json; charset=UTF-8");
-        Long since = new Long(request.getParameter("since")).longValue();
         ObjectMapper mapper = new ObjectMapper();
         JsonGenerator json =
             new JsonFactory().createJsonGenerator(
@@ -29,9 +28,9 @@ public class TaskUpdatesController extends Controller {
 
         if (request.getMethod().equals("GET")) {
             // PushUpdates
+            Long since = new Long(request.getParameter("since")).longValue();
             json.writeNumberField("now", new Date().getTime());
-            json.writeArrayFieldStart("updates");
-
+            json.writeFieldName("updates");
             TaskMeta p = TaskMeta.get();
             List<Task> tasks =
                 Datastore
@@ -39,7 +38,6 @@ public class TaskUpdatesController extends Controller {
                     .filter(p._lastChange.greaterThan(since))
                     .asList();
             mapper.writeValue(json, tasks);
-            json.writeEndArray();
         } else if (request.getMethod().equals("POST")) {
 
             // Parse for: Array of entity instance

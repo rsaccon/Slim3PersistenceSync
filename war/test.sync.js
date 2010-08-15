@@ -41,30 +41,31 @@ $(document).ready(function(){
           start();
         });
     });
-//
-//  module("Sync");
-//
-//  function noConflictsHandler(conflicts, updatesToPush, callback) {
-//    ok(false, "Should not go to conflict resolving");
-//    console.log("Conflicts: ", conflicts);
-//    callback();
-//  }
-//
-//  asyncTest("initial sync of project", function() {
-//      Project.syncAll(noConflictsHandler, function() {
-//          ok(true, "Came back from sync");
-//          Project.syncAll(noConflictsHandler, function() {
-//              ok(true, "Came back from second sync");
-//              Project.all().list(function(projects) {
-//                  equals(projects.length, 1, "1 project synced");
-//                  var p = projects[0];
-//                  equals(p.name, "Main project", "project name");
-//                  start();
-//                });
-//            });
-//        });
-//    });
-//
+
+  module("Sync");
+
+  function noConflictsHandler(conflicts, updatesToPush, callback) {
+	  console.log("666");
+    ok(false, "Should not go to conflict resolving");
+    console.log("Conflicts: ", conflicts);
+    callback();
+  }
+
+  asyncTest("initial sync of project", function() {
+      Project.syncAll(noConflictsHandler, function() {
+          ok(true, "Came back from sync");
+          Project.syncAll(noConflictsHandler, function() {
+              ok(true, "Came back from second sync");
+              Project.all().list(function(projects) {
+                  equals(projects.length, 1, "1 project synced");
+                  var p = projects[0];
+                  equals(p.name, "Main project", "project name");
+                  start();
+                });
+            });
+        });
+    });
+
 //  asyncTest("initial sync of tasks", function() {
 //      Task.syncAll(noConflictsHandler, function() {
 //          ok(true, "Came back from sync");
