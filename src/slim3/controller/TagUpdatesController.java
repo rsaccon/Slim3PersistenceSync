@@ -1,5 +1,6 @@
 package slim3.controller;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -7,11 +8,13 @@ import org.codehaus.jackson.JsonEncoding;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.type.TypeFactory;
 import org.slim3.controller.Controller;
 import org.slim3.controller.Navigation;
 import org.slim3.datastore.Datastore;
 
 import slim3.meta.TagMeta;
+import slim3.model.Project;
 import slim3.model.Tag;
 
 public class TagUpdatesController extends Controller {
@@ -39,6 +42,7 @@ public class TagUpdatesController extends Controller {
                     .asList();
             mapper.writeValue(json, tags);
         } else if (request.getMethod().equals("POST")) {
+            List<Project> projects = mapper.readValue(request.getInputStream(), TypeFactory.collectionType(ArrayList.class, Project.class));
 
             // Parse for: Array of entity instance
             // [{"id":"BDDF85807155497490C12D6DA3A833F1",
