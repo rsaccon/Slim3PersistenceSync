@@ -1,7 +1,11 @@
 package slim3.controller;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import org.codehaus.jackson.JsonEncoding;
@@ -12,6 +16,9 @@ import org.codehaus.jackson.map.type.TypeFactory;
 import org.slim3.controller.Controller;
 import org.slim3.controller.Navigation;
 import org.slim3.datastore.Datastore;
+import org.slim3.util.BeanUtil;
+
+import com.google.appengine.api.datastore.Key;
 
 import slim3.meta.TagMeta;
 import slim3.model.Project;
@@ -23,6 +30,7 @@ public class TagUpdatesController extends Controller {
     public Navigation run() throws Exception {
         response.setContentType("application/json; charset=UTF-8");
         ObjectMapper mapper = new ObjectMapper();
+        TagMeta meta = TagMeta.get();
         JsonGenerator json =
             new JsonFactory().createJsonGenerator(
                 response.getOutputStream(),
@@ -34,25 +42,48 @@ public class TagUpdatesController extends Controller {
             Long since = new Long(request.getParameter("since")).longValue();
             json.writeNumberField("now", new Date().getTime());
             json.writeFieldName("updates");
-            TagMeta p = TagMeta.get();
             List<Tag> tags =
                 Datastore
-                    .query(p)
-                    .filter(p._lastChange.greaterThan(since))
+                    .query(meta)
+                    .filter(meta._lastChange.greaterThan(since))
                     .asList();
             mapper.writeValue(json, tags);
         } else if (request.getMethod().equals("POST")) {
-            List<Project> projects = mapper.readValue(request.getInputStream(), TypeFactory.collectionType(ArrayList.class, Project.class));
-
-            // Parse for: Array of entity instance
-            // [{"id":"BDDF85807155497490C12D6DA3A833F1",
-            // "fieldName":"foo"}]
-
-            // The server is supposed to persist these changes (if valid).
-            // Internally the items must be assigned a `_lastChange` timestamp
-            // `TS`. If OK, the server will return a JSON object with "ok" as
-            // `status` and `TS` as `now`. _Note:_ it is important that the
-            // timestamp of all items and the one returned are the same.
+            long now = new Date().getTime();
+            Collection<Key> keys = new HashSet<Key>();
+            HashMap<String,Object> map = new HashMap<String,Object>();
+            List<HashMap<String,Object>> untyped = mapper.readValue(request.getInputStream(), TypeFactory.collectionType(ArrayList.class, HashMap.class));
+            Iterator<HashMap<String, Object>> untypedIter = untyped.iterator();
+            while(untypedIter.hasNext()){
+                HashMap<String, Object> obj = (HashMap<String, Object>) untypedIter.next(); 
+                Key key = Datastore.createKey(Project.class, obj.get("id").toString());
+                keys.add(key);
+                obj.remove("id");
+                map.put(key.toString(), obj);
+            }
+            
+            // existing elements
+            Iterator<Tag> tagIter = Datastore.query(meta).filter(meta.key.in(keys)).asList().iterator();
+            while(tagIter.hasNext()){
+                Tag tag = tagIter.next();
+                BeanUtil.copy(map.get(tag.getKey().toString()), tag);
+                tag.set_lastChange(now);
+                Datastore.put(tag);
+                map.remove(tag.getKey().toString());
+            }
+            
+            // new elements
+            Iterator<String> newKeysIter = map.keySet().iterator();
+             while (newKeysIter.hasNext()) {
+                String keyStr = newKeysIter.next();
+                HashMap<String, Object> obj = (HashMap<String, Object>)map.get(keyStr);
+                Tag tag = new Tag();
+                tag.setKey(Datastore.createKey(Tag.class, keyStr));
+                obj.remove("id");
+                BeanUtil.copy(obj, tag);
+                tag.set_lastChange(now);
+                Datastore.put(tag);
+            }
 
             json.writeStringField("status", "ok");
             json.writeNumberField("now", new Date().getTime());
