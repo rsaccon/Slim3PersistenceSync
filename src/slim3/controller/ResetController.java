@@ -18,7 +18,7 @@ public class ResetController extends Controller {
         Datastore.delete(Datastore.query(Project.class).asKeyList());
         Datastore.delete(Datastore.query(Tag.class).asKeyList());
         Datastore.delete(Datastore.query(Task.class).asKeyList());
-
+        
         Project project = new Project();
         project.setName("Main project");
         for (int i = 0; i < 25; i++) {
@@ -42,25 +42,3 @@ public class ResetController extends Controller {
         return null;
     }
 }
-
-
-//function generateDummyData(session) {
-//    var p = new Project(session, {name: "Main project"});
-//    session.add(p);
-//    for(var i = 0; i < 25; i++) {
-//      var t = new Task(session, {name: "Task " + i, done: false});
-//      p.tasks.add(t);
-//    }
-//  }
-//
-//  // Actions
-//  app.get('/reset', function(req, res) {
-//    req.conn.reset(req.tx, function() {
-//        req.conn.schemaSync(req.tx, function() {
-//            generateDummyData(req.conn);
-//            req.conn.flush(req.tx, function() {
-//                res.send({status: "ok"});
-//              });
-//          });
-//      });
-//  }); 

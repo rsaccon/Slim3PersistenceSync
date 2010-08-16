@@ -45,7 +45,6 @@ $(document).ready(function(){
   module("Sync");
 
   function noConflictsHandler(conflicts, updatesToPush, callback) {
-	  console.log("666");
     ok(false, "Should not go to conflict resolving");
     console.log("Conflicts: ", conflicts);
     callback();
@@ -66,22 +65,22 @@ $(document).ready(function(){
         });
     });
 
-//  asyncTest("initial sync of tasks", function() {
-//      Task.syncAll(noConflictsHandler, function() {
-//          ok(true, "Came back from sync");
-//          Task.syncAll(noConflictsHandler, function() {
-//              ok(true, "Came back from second sync");
-//              Task.all().list(function(tasks) {
-//                  equals(tasks.length, 25, "25 tasks synced");
-//                  tasks.forEach(function(task) {
-//                      equals(false, task.done, "task not done");
-//                    });
-//                  start();
-//                });
-//            });
-//        });
-//    });
-//
+  asyncTest("initial sync of tasks", function() {
+      Task.syncAll(noConflictsHandler, function() {
+          ok(true, "Came back from sync");
+          Task.syncAll(noConflictsHandler, function() {
+              ok(true, "Came back from second sync");
+              Task.all().list(function(tasks) {
+                  equals(tasks.length, 25, "25 tasks synced");
+                  tasks.forEach(function(task) {
+                      equals(false, task.done, "task not done");
+                    });
+                  start();
+                });
+            });
+        });
+    });
+
 //  asyncTest("setting some tasks to done and syncing again", function() {
 //      Task.all().list(function(tasks) {
 //          for(var i = 0; i < tasks.length; i++) {
