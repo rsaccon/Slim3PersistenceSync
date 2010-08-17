@@ -23,7 +23,6 @@ import com.google.appengine.api.datastore.Key;
 import slim3.meta.ProjectMeta;
 import slim3.model.Project;
 
-
 public class ProjectSyncService {
     
     ObjectMapper mapper = new ObjectMapper();
