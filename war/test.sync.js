@@ -81,148 +81,148 @@ $(document).ready(function(){
         });
     });
 
-//  asyncTest("setting some tasks to done and syncing again", function() {
-//      Task.all().list(function(tasks) {
-//          for(var i = 0; i < tasks.length; i++) {
-//            if(i % 2 === 0) {
-//              tasks[i].done = true;
-//            }
-//          }
-//          Task.syncAll(noConflictsHandler, function() {
-//              ok(true, "Came back from sync");
-//              start();
-//            });
-//        });
-//    });
-//
-//  function resetResync(callback) {
-//    persistence.reset(function() {
-//        persistence.schemaSync(function() {
-//            ok(true, "Database reset");
-//
-//            Project.syncAll(noConflictsHandler, function() {
-//                ok(true, "Came back from project sync");
-//                Task.syncAll(noConflictsHandler, function() {
-//                    ok(true, "Came back from task sync");
-//                    callback();
-//                  });
-//              });
-//          });
-//      });
-//  }
-//
-//  asyncTest("resetting local db and resyncing", function() {
-//      resetResync(function() {
-//          Task.all().filter("done", "=", true).count(function(n) {
-//              equals(13, n, "right number of tasks done.");
-//              start();
-//            });
-//        });
-//    });
-//
-//  asyncTest("creating some new objects", function() {
-//      var p = new Project({name: "Locally created project"});
-//      persistence.add(p);
-//      for(var i = 0; i < 10; i++) {
-//        var t = new Task({name: "Local task " + i});
-//        p.tasks.add(t);
-//      }
-//      persistence.flush(function() {
-//          ok(true, "project and tasks added locally");
-//          Project.syncAll(noConflictsHandler, function() {
-//              ok(true, "returned from project sync");
-//              Task.syncAll(noConflictsHandler, function() {
-//                  ok(true, "returned from task sync");
-//                  p.tasks.list(function(tasks) {
-//                      tasks.forEach(function(task) {
-//                          task.done = true;
-//                        });
-//                      Task.syncAll(noConflictsHandler, function() {
-//                          start();
-//                        });
-//                    });
-//                });
-//            });
-//        });
-//    });
-//
-//  asyncTest("resetting local db and resyncing", function() {
-//      resetResync(function() {
-//          Task.all().filter("done", "=", true).count(function(n) {
-//              equals(n, 23, "right number of tasks done.");
-//              start();
-//            });
-//        });
-//    });
-//
-//  asyncTest("marking all tasks done remotely", function() {
-//      persistence.sync.getJSON('/markAllDone', function(data) {
-//          same(data, {status: 'ok'}, "Remote reset");
-//          Task.syncAll(noConflictsHandler, function() {
-//              ok(true, "Came back from sync");
-//              Task.all().filter("done", "=", true).count(function(n) {
-//                  equals(35, n, "all tasks were marked done and synced correctly");
-//                  start();
-//                });
-//            });
-//        });
-//    });
-//
-//  module("Conflicts");
-//
-//  asyncTest("prefer local conflict handler", 8, function() {
-//      persistence.sync.getJSON('/markAllUndone', function(data) {
-//          same(data, {status: 'ok'}, "Remote marking undone");
-//          Task.all().list(function(tasks) {
-//              for(var i = 0; i < tasks.length; i++) {
-//                if(i % 2 === 0) {
-//                  tasks[i].done = true;
-//                }
-//              }
-//              persistence.flush(function() {
-//                  Task.syncAll(function(conflicts, updatesToPush, callback) {
-//                      ok(true, "Conflict resolver called");
-//                      equals(conflicts.length, 18, "Number of conflicts");
-//                      console.log("Conflicts: ", conflicts);
-//                      persistence.sync.preferLocalConflictHandler(conflicts, updatesToPush, callback);
-//                    }, function() {
-//                      ok(true, "Came back from sync");
-//                      resetResync(function() {
-//                          Task.all().filter("done", "=", true).list(function(tasks) {
-//                              equals(tasks.length, 18, "Conflicts were properly resolved towards the server");
-//                              start();
-//                            });
-//                        });
-//                    });
-//                });
-//            });
-//        });
-//    });
-//
-//  asyncTest("prefer remote conflict handler", 5, function() {
-//      persistence.sync.getJSON('/markAllUndone', function(data) {
-//          same(data, {status: 'ok'}, "Remote marking undone");
-//          Task.all().list(function(tasks) {
-//              for(var i = 0; i < tasks.length; i++) {
-//                if(i % 2 === 0) {
-//                  tasks[i].done = true;
-//                }
-//              }
-//              persistence.flush(function() {
-//                  Task.syncAll(function(conflicts, updatesToPush, callback) {
-//                      ok(true, "Conflict resolver called");
-//                      equals(conflicts.length, 18, "Number of conflicts");
-//                      console.log("Conflicts: ", conflicts);
-//                      persistence.sync.preferRemoteConflictHandler(conflicts, updatesToPush, callback);
-//                    }, function() {
-//                      ok(true, "Came back from sync");
-//                      Task.all().filter("done", "=", true).list(function(tasks) {
-//                          equals(tasks.length, 0, "Conflicts were properly resolved");
-//                          start();
-//                        });
-//                    });
-//                });
-//            });
-//        });
-//    });
+  asyncTest("setting some tasks to done and syncing again", function() {
+      Task.all().list(function(tasks) {
+          for(var i = 0; i < tasks.length; i++) {
+            if(i % 2 === 0) {
+              tasks[i].done = true;
+            }
+          }
+          Task.syncAll(noConflictsHandler, function() {
+              ok(true, "Came back from sync");
+              start();
+            });
+        });
+    });
+
+  function resetResync(callback) {
+    persistence.reset(function() {
+        persistence.schemaSync(function() {
+            ok(true, "Database reset");
+
+            Project.syncAll(noConflictsHandler, function() {
+                ok(true, "Came back from project sync");
+                Task.syncAll(noConflictsHandler, function() {
+                    ok(true, "Came back from task sync");
+                    callback();
+                  });
+              });
+          });
+      });
+  }
+
+  asyncTest("resetting local db and resyncing", function() {
+      resetResync(function() {
+          Task.all().filter("done", "=", true).count(function(n) {
+              equals(13, n, "right number of tasks done.");
+              start();
+            });
+        });
+    });
+
+  asyncTest("creating some new objects", function() {
+      var p = new Project({name: "Locally created project"});
+      persistence.add(p);
+      for(var i = 0; i < 10; i++) {
+        var t = new Task({name: "Local task " + i});
+        p.tasks.add(t);
+      }
+      persistence.flush(function() {
+          ok(true, "project and tasks added locally");
+          Project.syncAll(noConflictsHandler, function() {
+              ok(true, "returned from project sync");
+              Task.syncAll(noConflictsHandler, function() {
+                  ok(true, "returned from task sync");
+                  p.tasks.list(function(tasks) {
+                      tasks.forEach(function(task) {
+                          task.done = true;
+                        });
+                      Task.syncAll(noConflictsHandler, function() {
+                          start();
+                        });
+                    });
+                });
+            });
+        });
+    });
+
+  asyncTest("resetting local db and resyncing", function() {
+      resetResync(function() {
+          Task.all().filter("done", "=", true).count(function(n) {
+              equals(n, 23, "right number of tasks done.");
+              start();
+            });
+        });
+    });
+
+  asyncTest("marking all tasks done remotely", function() {
+      persistence.sync.getJSON('/markAllDone', function(data) {
+          same(data, {status: 'ok'}, "Remote reset");
+          Task.syncAll(noConflictsHandler, function() {
+              ok(true, "Came back from sync");
+              Task.all().filter("done", "=", true).count(function(n) {
+                  equals(35, n, "all tasks were marked done and synced correctly");
+                  start();
+                });
+            });
+        });
+    });
+
+  module("Conflicts");
+
+  asyncTest("prefer local conflict handler", 8, function() {
+      persistence.sync.getJSON('/markAllUndone', function(data) {
+          same(data, {status: 'ok'}, "Remote marking undone");
+          Task.all().list(function(tasks) {
+              for(var i = 0; i < tasks.length; i++) {
+                if(i % 2 === 0) {
+                  tasks[i].done = true;
+                }
+              }
+              persistence.flush(function() {
+                  Task.syncAll(function(conflicts, updatesToPush, callback) {
+                      ok(true, "Conflict resolver called");
+                      equals(conflicts.length, 18, "Number of conflicts");
+                      console.log("Conflicts: ", conflicts);
+                      persistence.sync.preferLocalConflictHandler(conflicts, updatesToPush, callback);
+                    }, function() {
+                      ok(true, "Came back from sync");
+                      resetResync(function() {
+                          Task.all().filter("done", "=", true).list(function(tasks) {
+                              equals(tasks.length, 18, "Conflicts were properly resolved towards the server");
+                              start();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+
+  asyncTest("prefer remote conflict handler", 5, function() {
+      persistence.sync.getJSON('/markAllUndone', function(data) {
+          same(data, {status: 'ok'}, "Remote marking undone");
+          Task.all().list(function(tasks) {
+              for(var i = 0; i < tasks.length; i++) {
+                if(i % 2 === 0) {
+                  tasks[i].done = true;
+                }
+              }
+              persistence.flush(function() {
+                  Task.syncAll(function(conflicts, updatesToPush, callback) {
+                      ok(true, "Conflict resolver called");
+                      equals(conflicts.length, 18, "Number of conflicts");
+                      console.log("Conflicts: ", conflicts);
+                      persistence.sync.preferRemoteConflictHandler(conflicts, updatesToPush, callback);
+                    }, function() {
+                      ok(true, "Came back from sync");
+                      Task.all().filter("done", "=", true).list(function(tasks) {
+                          equals(tasks.length, 0, "Conflicts were properly resolved");
+                          start();
+                        });
+                    });
+                });
+            });
+        });
+    });
 });

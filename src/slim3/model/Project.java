@@ -140,7 +140,7 @@ public class Project implements Serializable {
     }
     
     @JsonProperty
-    public Long id() {
-        return key.getId();
+    String id() {
+        return (key.getName() == null) ?  Long.toString(key.getId()) : key.getName();
     }
 }

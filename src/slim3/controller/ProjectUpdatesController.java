@@ -1,10 +1,8 @@
 package slim3.controller;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -57,7 +55,7 @@ public class ProjectUpdatesController extends Controller {
             while(untypedIter.hasNext()){
                 HashMap<String, Object> hashmap = (HashMap<String, Object>) untypedIter.next(); 
                 try {
-                    Key key = Datastore.createKey(Project.class, Long.parseLong((String) hashmap.get("id")));
+                    Key key = Datastore.createKey(Project.class, hashmap.get("id").toString());
                     Project project;
                     try {
                         project = Datastore.get(Project.class, key);
@@ -71,7 +69,9 @@ public class ProjectUpdatesController extends Controller {
                     Datastore.put(project);   
                 } catch (NumberFormatException nfe) {
                     ok = false;
-                } 
+                } catch (NullPointerException npe) {
+                    ok = false;
+                }
             }
             json.writeStringField("status", (ok) ? "ok" : "error");
             json.writeNumberField("now", now);

@@ -55,7 +55,7 @@ public class TagUpdatesController extends Controller {
             while(untypedIter.hasNext()){
                 HashMap<String, Object> hashmap = (HashMap<String, Object>) untypedIter.next(); 
                 try {
-                    Key key = Datastore.createKey(Tag.class, Long.parseLong((String) hashmap.get("id")));
+                    Key key = Datastore.createKey(Tag.class, hashmap.get("id").toString());
                     Tag tag;
                     try {
                         tag = Datastore.get(Tag.class, key);
@@ -68,6 +68,8 @@ public class TagUpdatesController extends Controller {
                     tag.set_lastChange(now);
                     Datastore.put(tag);   
                 } catch (NumberFormatException nfe) {
+                    ok = false;
+                } catch (NullPointerException npe) {
                     ok = false;
                 } 
             }

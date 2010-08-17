@@ -148,7 +148,7 @@ public class Tag implements Serializable {
     }
     
     @JsonProperty
-    public Long id() {
-        return key.getId();
+    public String id() {
+        return (key.getName() == null) ?  Long.toString(key.getId()) : key.getName();
     }
 }

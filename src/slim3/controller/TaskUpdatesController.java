@@ -55,7 +55,7 @@ public class TaskUpdatesController extends Controller {
             while(untypedIter.hasNext()){
                 HashMap<String, Object> hashmap = (HashMap<String, Object>) untypedIter.next(); 
                 try {
-                    Key key = Datastore.createKey(Task.class, Long.parseLong((String) hashmap.get("id")));
+                    Key key = Datastore.createKey(Task.class, hashmap.get("id").toString());
                     Task task;
                     try {
                         task = Datastore.get(Task.class, key);
@@ -68,6 +68,8 @@ public class TaskUpdatesController extends Controller {
                     task.set_lastChange(now);
                     Datastore.put(task);   
                 } catch (NumberFormatException nfe) {
+                    ok = false;
+                } catch (NullPointerException npe) {
                     ok = false;
                 } 
             }
