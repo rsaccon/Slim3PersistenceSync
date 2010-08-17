@@ -10,7 +10,7 @@ eclipse with appengine plugin
 
 Testsuite:
 ----------
-To run the testsuite, start the server and point your browser to its address 
+To run the testsuite, import this project into eclipse, start the server and point your browser to its address 
 
 Howto:
 -----
