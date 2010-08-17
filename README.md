@@ -10,11 +10,13 @@ eclipse with appengine plugin
 
 Testsuite:
 ----------
-To run the testsuite, import this project into eclipse, start the server and point your browser to its address 
+To run the testsuite, import this project into eclipse, start the server 
+and point your browser to the server address.
 
 Howto:
 -----
-to make your own models syncable, they need to be modified as follows (see models sourcecode):
+to make your own models syncable, they need to be modified as follows 
+(see models sourcecode):
   add `_lastChange` property (Long) and getter / setter
   add `dirty` property and put method 
   add Jackson JSON annotations at several places
