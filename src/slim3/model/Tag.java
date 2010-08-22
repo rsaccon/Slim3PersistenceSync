@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.repackaged.org.json.JSONException;
+import com.google.appengine.repackaged.org.json.JSONObject;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.slim3.datastore.Attribute;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.InverseModelListRef;
@@ -43,7 +43,6 @@ public class Tag implements Serializable {
      *
      * @return the key
      */
-    @JsonIgnore
     public Key getKey() {
         return key;
     }
@@ -54,7 +53,6 @@ public class Tag implements Serializable {
      * @param key
      *            the key
      */
-    @JsonIgnore
     public void setKey(Key key) {
         this.key = key;
     }
@@ -64,7 +62,6 @@ public class Tag implements Serializable {
      *
      * @return the version
      */
-    @JsonIgnore
     public Long getVersion() {
         return version;
     }
@@ -75,7 +72,6 @@ public class Tag implements Serializable {
      * @param version
      *            the version
      */
-    @JsonIgnore
     public void setVersion(Long version) {
         this.version = version;
     }
@@ -121,12 +117,10 @@ public class Tag implements Serializable {
         return name;
     }
 
-    @JsonIgnore
     public InverseModelListRef<Task, Tag> getTagListRef() {
         return tagListRef;
     }
 
-    @JsonIgnore
     public ModelRef<Task> getTaskRef() {
         return taskRef;
     }
@@ -147,8 +141,11 @@ public class Tag implements Serializable {
         return Datastore.put(this);
     }
     
-    @JsonProperty
-    public String id() {
-        return (key.getName() == null) ?  Long.toString(key.getId()) : key.getName();
+    public void copyFromJSON(JSONObject obj) {
+        try {
+            name = obj.getString("name");
+        } catch (JSONException e) {
+            // ignore;
+        }
     }
 }
