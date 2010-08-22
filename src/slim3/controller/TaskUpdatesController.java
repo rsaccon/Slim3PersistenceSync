@@ -13,11 +13,12 @@ public class TaskUpdatesController extends Controller {
         
         TaskSyncService sync =  new TaskSyncService();
         
-        if (request.getMethod().equals("GET")) {
+        if (isGet()) {
             sync.pushUpdates(
-                new Long(request.getParameter("since")).longValue(),
+                //new Long(param("since")).longValue(),
+                asLong("since"),
                 response.getOutputStream());
-        } else if (request.getMethod().equals("POST")) {
+        } else if (isPost()) {
             sync.receiveUpdates(
                 request.getInputStream(),
                 response.getOutputStream());

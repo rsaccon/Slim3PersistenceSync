@@ -13,11 +13,11 @@ public class ProjectUpdatesController extends Controller {
         
         ProjectSyncService sync =  new ProjectSyncService();
         
-        if (request.getMethod().equals("GET")) {
+        if (isGet()) {
             sync.pushUpdates(
-                new Long(request.getParameter("since")).longValue(),
+                asLong("since"),
                 response.getOutputStream());
-        } else if (request.getMethod().equals("POST")) {
+        } else if (isPost()) {
             sync.receiveUpdates(
                 request.getInputStream(),
                 response.getOutputStream());

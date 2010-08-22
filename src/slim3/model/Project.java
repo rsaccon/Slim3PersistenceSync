@@ -141,6 +141,6 @@ public class Project implements Serializable {
     
     @JsonProperty
     String id() {
-        return (key.getName() == null) ?  Long.toString(key.getId()) : key.getName();
+        return (key.getName() == null) ? Long.toString(key.getId()) : key.getName();
     }
 }

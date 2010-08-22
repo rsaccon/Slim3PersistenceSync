@@ -123,7 +123,7 @@ persistence.sync.postJSON = function(uri, data, callback) {
               var lastServerPushTime = sync ? persistence.get(sync, 'serverPushDate') : 0;
               var lastLocalSyncTime = sync ? persistence.get(sync, 'localDate') : 0;
               var meta = Entity.meta;
-              var fieldSpec = meta.fields;
+              var fieldSpec = meta.fields;   
 
               //var now = getEpoch(new Date());
               if(!sync) {
@@ -142,7 +142,6 @@ persistence.sync.postJSON = function(uri, data, callback) {
                       ids.push(item.id);
                       lookupTbl[item.id] = item;
                     })
-                  
                   // Step 1: Look at local versions of remotely updated entities
                   Entity.all(session).filter("id", "in", ids).list(function(existingItems) {
                       existingItems.forEach(function(localItem) {
