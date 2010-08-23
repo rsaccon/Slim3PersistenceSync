@@ -158,7 +158,6 @@ persistence.sync.postJSON = function(uri, data, callback) {
                           for(var p in remoteItem) {
                             if(remoteItem.hasOwnProperty(p) && p !== '_lastChange') {
                               if(localItem._data[p] !== remoteItem[p]) {
-console.log(">> Step 1:");
                                 if(localChangedSinceSync && remoteItem._lastChange === lastServerPushTime) { 
                                   // Unchanged at server, but changed locally
                                   itemUpdatedFields[p] = localItem._data[p];
@@ -182,7 +181,6 @@ console.log(">> Step 1:");
                       // NOTE: all that's left in lookupTbl is new, we deleted the existing items
                       for(var id in lookupTbl) {
                         if(lookupTbl.hasOwnProperty(id)) {
-console.log(">> Step 2: ");
                           var remoteItem = lookupTbl[id];
                           delete remoteItem.id;
                           var localItem = new Entity(remoteItem);
@@ -194,7 +192,6 @@ console.log(">> Step 2: ");
                       // Step 3: Find local new/updated items (not part of the remote change set)
                       Entity.all(session).filter("id", "not in", ids).filter("_lastChange", ">", lastLocalSyncTime).list(function(newItems) {
                           newItems.forEach(function(newItem) {
-console.log(">> Step 3: ");
                               var update = { id: newItem.id };
                               for(var p in fieldSpec) {
                                 if(fieldSpec.hasOwnProperty(p) && p != '_lastChange') {
@@ -211,8 +208,6 @@ console.log(">> Step 3: ");
                           function next() {
                             persistence.sync.postJSON(uri, JSON.stringify(updatesToPush), function(pushData) {
                                 session.flush(function() {
-console.log("POST TS: "+pushData.now);
-console.log("GET TS: > "+result.now);
                                     sync.localDate = getEpoch(new Date());
                                     sync.serverDate = result.now;
                                     sync.serverPushDate = pushData.now;
