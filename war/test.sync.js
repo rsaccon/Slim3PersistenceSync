@@ -114,7 +114,7 @@ $(document).ready(function(){
   asyncTest("resetting local db and resyncing", function() {
       resetResync(function() {
           Task.all().filter("done", "=", true).count(function(n) {
-              equals(13, n, "right number of tasks done.");
+              equals(n, 13, "right number of tasks done.");
               start();
             });
         });

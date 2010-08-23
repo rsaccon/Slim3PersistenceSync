@@ -25,7 +25,7 @@ public class Project implements Serializable {
   
     // TODO: create this automatically in meta data only
     @Attribute(persistent = false)
-    private boolean _dirty = false;
+    private boolean _dirty = true;
     
     // TODO: create this automatically in meta data only
     private Long _lastChange;

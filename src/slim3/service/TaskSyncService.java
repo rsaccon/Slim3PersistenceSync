@@ -32,18 +32,38 @@ public class TaskSyncService {
         while (taskIterator.hasNext()) {
             Task task = taskIterator.next();
             Key key = task.getKey();
+            Key projectKey = task.getProjectRef().getKey();
+            Key tagKey = task.getTagRef().getKey();
             JSONObject obj = new JSONObject(task);
 
+            obj.remove("projectRef");
+            obj.remove("tagRef");
             obj.remove("class");
             obj.remove("key");
             obj.remove("version");
+            
             obj.put(
                 "id",
                 (key.getName() == null) ? Long.toString(key.getId()) : key
                     .getName());
-
+            if (projectKey != null) {
+                obj.put(
+                    "project",
+                    (projectKey.getName() == null) ? Long.toString(projectKey.getId()) : projectKey
+                        .getName());
+            }
+            
+            if (tagKey != null) {
+                obj.put(
+                    "tag",
+                    (tagKey.getName() == null) ? Long.toString(tagKey.getId()) : tagKey
+                        .getName());
+            }
+            
             arr.put(obj);
         }
+        
+        System.out.println(">> push tasks updates since: "+ since + " | "+ arr);
 
         return new JSONStringer()
             .object()
@@ -57,13 +77,19 @@ public class TaskSyncService {
     
     public String receiveUpdates(String updates) throws JSONException {
         long now = new Date().getTime();
-        boolean ok = true;
-
-        JSONArray arr = new JSONArray(updates);
+        JSONArray arr = new JSONArray(updates);  
+        
+        System.out.println(">> receive tasks updates: "+now);
 
         for (int i = 0; i < arr.length(); i++) {
             JSONObject obj = arr.getJSONObject(i);
-            Key key = Datastore.createKey(Task.class, obj.get("id").toString());
+            System.out.println(obj);
+            Key key;
+            try {
+                key = Datastore.createKey(Task.class, obj.getLong("id"));
+            } catch (JSONException e) {
+                key = Datastore.createKey(Task.class, obj.getString("id"));
+            }
             Task task;
             try {
                 task = Datastore.get(Task.class, key);
@@ -71,7 +97,6 @@ public class TaskSyncService {
                 task = new Task();
                 task.setKey(key);
             }
-            obj.remove("id");
             task.copyFromJSON(obj);
             task.set_lastChange(now);
             Datastore.put(task);
@@ -80,7 +105,7 @@ public class TaskSyncService {
         return new JSONStringer()
             .object()
             .key("status")
-            .value((ok) ? "ok" : "error")
+            .value("ok")
             .key("now")
             .value(now)
             .endObject()

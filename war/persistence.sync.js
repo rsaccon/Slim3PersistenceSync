@@ -130,8 +130,8 @@ persistence.sync.postJSON = function(uri, data, callback) {
                 sync = new persistence.sync.Sync(session, {entity: Entity.meta.name});
                 session.add(sync);
               }
-
-              persistence.sync.getJSON(uri + '?since=' + lastServerSyncTime, function(result) {
+            		  
+              persistence.sync.getJSON(uri + '?since=' + Math.max(lastServerSyncTime,lastServerPushTime), function(result) {
                   var ids = [];
                   var lookupTbl = {};
 
@@ -142,6 +142,7 @@ persistence.sync.postJSON = function(uri, data, callback) {
                       ids.push(item.id);
                       lookupTbl[item.id] = item;
                     })
+                    
                   // Step 1: Look at local versions of remotely updated entities
                   Entity.all(session).filter("id", "in", ids).list(function(existingItems) {
                       existingItems.forEach(function(localItem) {
@@ -157,6 +158,7 @@ persistence.sync.postJSON = function(uri, data, callback) {
                           for(var p in remoteItem) {
                             if(remoteItem.hasOwnProperty(p) && p !== '_lastChange') {
                               if(localItem._data[p] !== remoteItem[p]) {
+console.log(">> Step 1:");
                                 if(localChangedSinceSync && remoteItem._lastChange === lastServerPushTime) { 
                                   // Unchanged at server, but changed locally
                                   itemUpdatedFields[p] = localItem._data[p];
@@ -180,6 +182,7 @@ persistence.sync.postJSON = function(uri, data, callback) {
                       // NOTE: all that's left in lookupTbl is new, we deleted the existing items
                       for(var id in lookupTbl) {
                         if(lookupTbl.hasOwnProperty(id)) {
+console.log(">> Step 2: ");
                           var remoteItem = lookupTbl[id];
                           delete remoteItem.id;
                           var localItem = new Entity(remoteItem);
@@ -191,6 +194,7 @@ persistence.sync.postJSON = function(uri, data, callback) {
                       // Step 3: Find local new/updated items (not part of the remote change set)
                       Entity.all(session).filter("id", "not in", ids).filter("_lastChange", ">", lastLocalSyncTime).list(function(newItems) {
                           newItems.forEach(function(newItem) {
+console.log(">> Step 3: ");
                               var update = { id: newItem.id };
                               for(var p in fieldSpec) {
                                 if(fieldSpec.hasOwnProperty(p) && p != '_lastChange') {
@@ -207,6 +211,8 @@ persistence.sync.postJSON = function(uri, data, callback) {
                           function next() {
                             persistence.sync.postJSON(uri, JSON.stringify(updatesToPush), function(pushData) {
                                 session.flush(function() {
+console.log("POST TS: "+pushData.now);
+console.log("GET TS: > "+result.now);
                                     sync.localDate = getEpoch(new Date());
                                     sync.serverDate = result.now;
                                     sync.serverPushDate = pushData.now;

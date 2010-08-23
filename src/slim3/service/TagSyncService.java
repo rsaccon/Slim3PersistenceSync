@@ -32,16 +32,26 @@ public class TagSyncService {
         while (tagIterator.hasNext()) {
             Tag tag = tagIterator.next();
             Key key = tag.getKey();
+            Key taskKey = tag.getTaskRef().getKey();
             JSONObject obj = new JSONObject(tag);
 
+            obj.remove("taskRef");
             obj.remove("class");
             obj.remove("key");
             obj.remove("version");
+            
             obj.put(
                 "id",
                 (key.getName() == null) ? Long.toString(key.getId()) : key
                     .getName());
-
+            
+            if (taskKey != null) {
+                obj.put(
+                    "project",
+                    (taskKey.getName() == null) ? Long.toString(taskKey.getId()) : taskKey
+                        .getName());
+            }
+            
             arr.put(obj);
         }
 
@@ -57,13 +67,16 @@ public class TagSyncService {
     
     public String receiveUpdates(String updates) throws JSONException {
         long now = new Date().getTime();
-        boolean ok = true;
-
         JSONArray arr = new JSONArray(updates);
 
-        for (int i = 0; i < arr.length(); i++) {
+        for (int i=0; i<arr.length(); i++) {
             JSONObject obj = arr.getJSONObject(i);
-            Key key = Datastore.createKey(Tag.class, obj.get("id").toString());
+            Key key;
+            try {
+                key = Datastore.createKey(Tag.class, obj.getLong("id"));
+            } catch (JSONException e) {
+                key = Datastore.createKey(Tag.class, obj.getString("id"));
+            }
             Tag tag;
             try {
                 tag = Datastore.get(Tag.class, key);
@@ -80,7 +93,7 @@ public class TagSyncService {
         return new JSONStringer()
             .object()
             .key("status")
-            .value((ok) ? "ok" : "error")
+            .value("ok")
             .key("now")
             .value(now)
             .endObject()

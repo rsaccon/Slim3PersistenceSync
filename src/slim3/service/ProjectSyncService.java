@@ -36,6 +36,7 @@ public class ProjectSyncService {
             obj.remove("class");
             obj.remove("key");
             obj.remove("version");
+            
             obj.put(
                 "id",
                 (key.getName() == null) ? Long.toString(key.getId()) : key
@@ -56,13 +57,16 @@ public class ProjectSyncService {
     
     public String receiveUpdates(String updates) throws JSONException {
         long now = new Date().getTime();
-        boolean ok = true;
-        
         JSONArray arr = new JSONArray(updates);
         
-        for ( int i=0; i<arr.length(); i++ ) {
+        for (int i=0; i<arr.length(); i++ ) {
             JSONObject obj = arr.getJSONObject(i);
-            Key key = Datastore.createKey(Project.class, obj.get("id").toString());
+            Key key;
+            try {
+                key = Datastore.createKey(Project.class, obj.getLong("id"));
+            } catch (JSONException e) {
+                key = Datastore.createKey(Project.class, obj.getString("id"));
+            }
             Project project;
             try {
                 project = Datastore.get(Project.class, key);
@@ -79,7 +83,7 @@ public class ProjectSyncService {
         return new JSONStringer()
             .object()
             .key("status")
-            .value((ok) ? "ok" : "error")
+            .value("ok")
             .key("now")
             .value(now)
             .endObject()

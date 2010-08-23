@@ -26,7 +26,7 @@ public class Task implements Serializable {
     
     // TODO: create this automatically in meta data only
     @Attribute(persistent = false)
-    private boolean _dirty = false;
+    private boolean _dirty = true;
     
     // TODO: create this automatically in meta data only
     private Long _lastChange;
@@ -157,7 +157,24 @@ public class Task implements Serializable {
     public void copyFromJSON(JSONObject obj) {
         try {
             name = obj.getString("name");
+            
             done = obj.getBoolean("done");
+            
+            Key projectKey;
+            try {
+                projectKey = Datastore.createKey(Project.class, obj.getLong("project"));
+            } catch (JSONException e) {
+                projectKey = Datastore.createKey(Project.class, obj.getString("project"));
+            }
+            projectRef.setKey(projectKey);
+            
+            Key tagKey;
+            try {
+                tagKey = Datastore.createKey(Tag.class, obj.getLong("tag"));
+            } catch (JSONException e) {
+                tagKey = Datastore.createKey(Tag.class, obj.getString("tag"));
+            }
+            tagRef.setKey(tagKey);
         } catch (JSONException e) {
             // ignore;
         }
