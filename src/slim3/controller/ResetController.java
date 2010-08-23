@@ -25,9 +25,9 @@ public class ResetController extends Controller {
             task.setName("Task "+ i);
             task.setDone(false);
             task.getProjectRef().setModel(project);
-            task.put();
+            task.syncAwarePut();
         }
-        project.put();
+        project.syncAwarePut();
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

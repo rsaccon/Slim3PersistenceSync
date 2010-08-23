@@ -26,7 +26,7 @@ public class Tag implements Serializable {
     
     // TODO: create this automatically in meta data only
     @Attribute(persistent = false)
-    private boolean _dirty = true;
+    private boolean _dirty = false;
     
     // TODO: create this automatically in meta data only
     private Long _lastChange;
@@ -133,7 +133,7 @@ public class Tag implements Serializable {
         return _lastChange;
     }
     
-    public Key put() throws NullPointerException {
+    public Key syncAwarePut() throws NullPointerException {
         if (_dirty) {
             _lastChange = new Date().getTime();
             _dirty = false;

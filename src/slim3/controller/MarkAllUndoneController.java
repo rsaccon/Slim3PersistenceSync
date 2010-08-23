@@ -18,7 +18,7 @@ public class MarkAllUndoneController extends Controller {
         while(iterator.hasNext()){
             Task task = (Task) iterator.next(); 
             task.setDone(false);
-            task.put();
+            task.syncAwarePut();
         }
         
         response.setContentType("application/json");

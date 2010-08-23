@@ -18,7 +18,7 @@ public class MarkAllDoneController extends Controller {
         while(iterator.hasNext()){
             Task task = (Task) iterator.next(); 
             task.setDone(true);
-            task.put();
+            task.syncAwarePut();
         }
         
         response.setContentType("application/json");
