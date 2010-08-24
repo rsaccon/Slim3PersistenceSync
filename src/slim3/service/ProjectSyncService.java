@@ -74,7 +74,6 @@ public class ProjectSyncService {
                 project = new Project();
                 project.setKey(key);
             }
-            obj.remove("id");
             project.copyFromJSON(obj);
             project.set_lastChange(now);
             Datastore.put(project);  

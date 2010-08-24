@@ -84,7 +84,6 @@ public class TagSyncService {
                 tag = new Tag();
                 tag.setKey(key);
             }
-            obj.remove("id");
             tag.copyFromJSON(obj);
             tag.set_lastChange(now);
             Datastore.put(tag);
