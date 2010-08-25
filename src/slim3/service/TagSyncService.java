@@ -40,6 +40,8 @@ public class TagSyncService {
             obj.remove("key");
             obj.remove("version");
             
+            obj.put("_lastChange", tag.get_lastChange());
+            
             obj.put(
                 "id",
                 (key.getName() == null) ? Long.toString(key.getId()) : key
@@ -47,7 +49,7 @@ public class TagSyncService {
             
             if (taskKey != null) {
                 obj.put(
-                    "project",
+                    "task",
                     (taskKey.getName() == null) ? Long.toString(taskKey.getId()) : taskKey
                         .getName());
             }
@@ -84,7 +86,7 @@ public class TagSyncService {
                 tag = new Tag();
                 tag.setKey(key);
             }
-            tag.copyFromJSON(obj);
+            tag.fromJSON(obj);
             tag.set_lastChange(now);
             Datastore.put(tag);
         }

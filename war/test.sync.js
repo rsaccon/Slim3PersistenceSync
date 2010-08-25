@@ -199,30 +199,30 @@ $(document).ready(function(){
         });
     });
 
-//  asyncTest("prefer remote conflict handler", 5, function() {
-//      persistence.sync.getJSON('/markAllUndone', function(data) {
-//          same(data, {status: 'ok'}, "Remote marking undone");
-//          Task.all().list(function(tasks) {
-//              for(var i = 0; i < tasks.length; i++) {
-//                if(i % 2 === 0) {
-//                  tasks[i].done = true;
-//                }
-//              }
-//              persistence.flush(function() {
-//                  Task.syncAll(function(conflicts, updatesToPush, callback) {
-//                      ok(true, "Conflict resolver called");
-//                      equals(conflicts.length, 18, "Number of conflicts");
-//                      console.log("Conflicts: ", conflicts);
-//                      persistence.sync.preferRemoteConflictHandler(conflicts, updatesToPush, callback);
-//                    }, function() {
-//                      ok(true, "Came back from sync");
-//                      Task.all().filter("done", "=", true).list(function(tasks) {
-//                          equals(tasks.length, 0, "Conflicts were properly resolved");
-//                          start();
-//                        });
-//                    });
-//                });
-//            });
-//        });
-//    });
+  asyncTest("prefer remote conflict handler", 5, function() {
+      persistence.sync.getJSON('/markAllUndone', function(data) {
+          same(data, {status: 'ok'}, "Remote marking undone");
+          Task.all().list(function(tasks) {
+              for(var i = 0; i < tasks.length; i++) {
+                if(i % 2 === 0) {
+                  tasks[i].done = true;
+                }
+              }
+              persistence.flush(function() {
+                  Task.syncAll(function(conflicts, updatesToPush, callback) {
+                      ok(true, "Conflict resolver called");
+                      equals(conflicts.length, 18, "Number of conflicts");
+                      console.log("Conflicts: ", conflicts);
+                      persistence.sync.preferRemoteConflictHandler(conflicts, updatesToPush, callback);
+                    }, function() {
+                      ok(true, "Came back from sync");
+                      Task.all().filter("done", "=", true).list(function(tasks) {
+                          equals(tasks.length, 0, "Conflicts were properly resolved");
+                          start();
+                        });
+                    });
+                });
+            });
+        });
+    });
 });

@@ -146,7 +146,7 @@ public class Task implements Serializable {
         return _lastChange;
     }
     
-    public Key syncAwarePut() throws NullPointerException {
+    public Key put() throws NullPointerException {
         if (_dirty) {
             _lastChange = new Date().getTime();
             _dirty = false;
@@ -154,29 +154,36 @@ public class Task implements Serializable {
         return Datastore.put(this);
     }
      
-    public void copyFromJSON(JSONObject obj) {
+    public void fromJSON(JSONObject json) {
         try {
-            name = obj.getString("name");
-            
-            done = obj.getBoolean("done");
-            
-            Key projectKey;
-            try {
-                projectKey = Datastore.createKey(Project.class, obj.getLong("project"));
-            } catch (JSONException e) {
-                projectKey = Datastore.createKey(Project.class, obj.getString("project"));
+            if (json.has("name")) {
+                name = json.getString("name");
             }
-            projectRef.setKey(projectKey);
-            
-            Key tagKey;
-            try {
-                tagKey = Datastore.createKey(Tag.class, obj.getLong("tag"));
-            } catch (JSONException e) {
-                tagKey = Datastore.createKey(Tag.class, obj.getString("tag"));
+            if (json.has("done")) {
+                done = json.getBoolean("done");
             }
-            tagRef.setKey(tagKey);
-        } catch (JSONException e) {
-            // ignore;
+            if (json.has("project")) {
+                Key projectKey = null;
+                try {
+                    projectKey = Datastore.createKey(Project.class, json.getLong("project"));
+                } catch (JSONException e) {
+                    projectKey = Datastore.createKey(Project.class, json.getString("project"));
+                }
+                projectRef.setKey(projectKey);
+            }
+            if (json.has("tag")) {
+                Key tagKey = null;
+                try {
+                    tagKey = Datastore.createKey(Tag.class, json.getLong("tag"));
+                } catch (JSONException e) {
+                    tagKey = Datastore.createKey(Tag.class, json.getString("tag"));
+                }
+                tagRef.setKey(tagKey);
+            }
+        } catch (JSONException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
         }
     }
+
 }

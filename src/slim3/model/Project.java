@@ -3,14 +3,14 @@ package slim3.model;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.repackaged.org.json.JSONException;
-import com.google.appengine.repackaged.org.json.JSONObject;
-
 import org.slim3.datastore.Attribute;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.InverseModelListRef;
 import org.slim3.datastore.Model;
+
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.repackaged.org.json.JSONException;
+import com.google.appengine.repackaged.org.json.JSONObject;
 
 @Model(schemaVersion = 1)
 public class Project implements Serializable {
@@ -126,7 +126,7 @@ public class Project implements Serializable {
         return _lastChange;
     }
     
-    public Key syncAwarePut() throws NullPointerException {
+    public Key put() throws NullPointerException {
         if (_dirty) {
             _lastChange = new Date().getTime();
             _dirty = false;
@@ -134,11 +134,15 @@ public class Project implements Serializable {
         return Datastore.put(this);
     }
 
-    public void copyFromJSON(JSONObject obj) {
+    public void fromJSON(JSONObject json) {
         try {
-            name = obj.getString("name");
-        } catch (JSONException e) {
-            // ignore;
+            if (json.has("name")) {
+                name = json.getString("name");
+            }
+        } catch (JSONException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
         }
     }
+    
 }

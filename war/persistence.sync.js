@@ -131,7 +131,7 @@ persistence.sync.postJSON = function(uri, data, callback) {
                 session.add(sync);
               }
             		  
-              persistence.sync.getJSON(uri + '?since=' + Math.max(lastServerSyncTime,lastServerPushTime), function(result) {
+              persistence.sync.getJSON(uri + '?since=' + lastServerSyncTime, function(result) {
                   var ids = [];
                   var lookupTbl = {};
 
@@ -151,6 +151,8 @@ persistence.sync.postJSON = function(uri, data, callback) {
                           delete lookupTbl[localItem.id];
 
                           var localChangedSinceSync = lastLocalSyncTime < localItem._lastChange;
+                          
+                          console.log(remoteItem);
 
                           var itemUpdatedFields = { id: localItem.id };
                           var itemUpdated = false;
@@ -158,7 +160,9 @@ persistence.sync.postJSON = function(uri, data, callback) {
                           for(var p in remoteItem) {
                             if(remoteItem.hasOwnProperty(p) && p !== '_lastChange') {
                               if(localItem._data[p] !== remoteItem[p]) {
+                            	  console.log(">>>>>>>>>" + localChangedSinceSync + " " + remoteItem._lastChange + " " + lastServerPushTime);  
                                 if(localChangedSinceSync && remoteItem._lastChange === lastServerPushTime) { 
+                                  console.log(">>>>>>>>>");
                                   // Unchanged at server, but changed locally
                                   itemUpdatedFields[p] = localItem._data[p];
                                   itemUpdated = true;

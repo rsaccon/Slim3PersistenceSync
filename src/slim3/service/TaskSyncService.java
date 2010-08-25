@@ -42,6 +42,8 @@ public class TaskSyncService {
             obj.remove("key");
             obj.remove("version");
             
+            obj.put("_lastChange", task.get_lastChange());
+
             obj.put(
                 "id",
                 (key.getName() == null) ? Long.toString(key.getId()) : key
@@ -62,8 +64,6 @@ public class TaskSyncService {
             
             arr.put(obj);
         }
-        
-        System.out.println(">> push tasks updates since: "+ since + " | "+ arr);
 
         return new JSONStringer()
             .object()
@@ -79,17 +79,16 @@ public class TaskSyncService {
         long now = new Date().getTime();
         JSONArray arr = new JSONArray(updates);  
         
-        System.out.println(">> receive tasks updates: "+now);
-
         for (int i = 0; i < arr.length(); i++) {
             JSONObject obj = arr.getJSONObject(i);
-            System.out.println(obj);
+
             Key key;
             try {
                 key = Datastore.createKey(Task.class, obj.getLong("id"));
             } catch (JSONException e) {
                 key = Datastore.createKey(Task.class, obj.getString("id"));
             }
+            
             Task task;
             try {
                 task = Datastore.get(Task.class, key);
@@ -97,7 +96,7 @@ public class TaskSyncService {
                 task = new Task();
                 task.setKey(key);
             }
-            task.copyFromJSON(obj);
+            task.fromJSON(obj);
             task.set_lastChange(now);
             Datastore.put(task);
         }

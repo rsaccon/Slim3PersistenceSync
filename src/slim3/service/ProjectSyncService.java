@@ -37,6 +37,8 @@ public class ProjectSyncService {
             obj.remove("key");
             obj.remove("version");
             
+            obj.put("_lastChange", project.get_lastChange());
+            
             obj.put(
                 "id",
                 (key.getName() == null) ? Long.toString(key.getId()) : key
@@ -74,7 +76,7 @@ public class ProjectSyncService {
                 project = new Project();
                 project.setKey(key);
             }
-            project.copyFromJSON(obj);
+            project.fromJSON(obj);
             project.set_lastChange(now);
             Datastore.put(project);  
         }
