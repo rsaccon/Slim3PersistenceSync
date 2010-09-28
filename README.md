@@ -4,24 +4,18 @@ Serverside sync (in Java / on appengine) for persistencejs
 This is a proof-of-concept, on top of slim3 appengine java framework.
 It currently just runs the presistencejs sync testsuite.
 
-Requirements: 
--------------
+Requirements / dependencies: 
+----------------------------
 eclipse with appengine plugin
+In same folder as this project:
+  http://github.com/rsaccon/persistencejs-gen
+  http://github.com/rsaccon/persistencejs-sync
 
 Testsuite:
 ----------
-To run the testsuite, import this project into eclipse, start the server 
+To run the testsuite, import this project (and required dependencies) into eclipse, start the server 
 and point your browser to the server address.
 
 Howto:
 -----
-to make your own models syncable, they need to be modified as follows 
-(see models sourcecode):
-  add `_lastChange` property (Long) and getter / setter
-  add `dirty` property and put method 
-  add Jackson JSON annotations at several places
-
-
-TODO:
----- 
-  add ANT task to generate syncable models and syncService
+see sourcecode
