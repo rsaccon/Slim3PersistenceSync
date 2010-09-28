@@ -1,6 +1,7 @@
 $(document).ready(function(){
   persistence.store.websql.config(persistence, 'persistencetest', 'My db', 5 * 1024 * 1024);
-  persistence.debug = true;  
+  //persistence.store.memory.config(persistence);
+  persistence.debug = true;
 
   var Project = persistence.define('Project', {
       name: "TEXT"
@@ -23,13 +24,13 @@ $(document).ready(function(){
   Task.enableSync('/taskUpdates');
   Project.enableSync('/projectUpdates');
   Tag.enableSync('/tagUpdates');
-	  
+
   module("Setup");
 
   asyncTest("setting up local database", function() {
       persistence.reset(function() {
-          persistence.schemaSync(function(tx){
-              ok(tx.executeSql, 'schemaSync passed transaction as argument to callback');
+          persistence.schemaSync(function(){
+              ok(true, 'came back from schemaSync');
               start();
             });
         });
@@ -114,7 +115,7 @@ $(document).ready(function(){
   asyncTest("resetting local db and resyncing", function() {
       resetResync(function() {
           Task.all().filter("done", "=", true).count(function(n) {
-              equals(n, 13, "right number of tasks done.");
+              equals(n, 13, "right number of tasks done");
               start();
             });
         });
@@ -134,6 +135,7 @@ $(document).ready(function(){
               Task.syncAll(noConflictsHandler, function() {
                   ok(true, "returned from task sync");
                   p.tasks.list(function(tasks) {
+                      equals(tasks.length, 10, 'check collection size');
                       tasks.forEach(function(task) {
                           task.done = true;
                         });
@@ -225,4 +227,4 @@ $(document).ready(function(){
             });
         });
     });
-});
+});                  

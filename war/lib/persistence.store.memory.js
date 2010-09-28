@@ -107,6 +107,7 @@ persistence.store.memory.config = function(persistence) {
     coll._orderColumns = otherColl._orderColumns;
     coll._limit = otherColl._limit;
     coll._skip = otherColl._skip;
+    coll._reverse = otherColl._reverse;
     return coll;
   }
   /**
@@ -191,7 +192,7 @@ persistence.store.memory.config = function(persistence) {
       // Let's find the inverse collection
       var meta = persistence.getMeta(this._obj._type);
       var inverseProperty = meta.hasMany[this._coll].inverseProperty;
-      persistence.get(item, inverseProperty).remove(this._obj, true);
+      persistence.get(item, inverseProperty).remove(this._obj, true); 
     }
   };
 };

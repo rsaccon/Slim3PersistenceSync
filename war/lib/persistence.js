@@ -34,8 +34,16 @@ try {
   exports.console = console;
 }
 
-var persistence = (window && window.persistence) ? window.persistence : {}; 
+var persistence = (window && window.persistence) ? window.persistence : createPersistence(); 
 
+try {
+  exports.createPersistence = createPersistence;
+  exports.persistence = persistence;
+} catch(e) {}
+
+function createPersistence() {
+	var persistence = {};
+	
 /**
  * Check for immutable fields
  */
@@ -82,7 +90,6 @@ persistence.get = function(arg1, arg2) {
     persistence.globalPropertyListeners = {}; // EntityType__prop -> QueryColleciton obj
     persistence.queryCollectionCache = {}; // entityName -> uniqueString -> QueryCollection
 
-
     persistence.getObjectsToRemove = function() { return this.objectsToRemove; }
     persistence.getTrackedObjects = function() { return this.trackedObjects; }
 
@@ -91,7 +98,7 @@ persistence.get = function(arg1, arg2) {
     persistence.flushHooks = [];
     persistence.schemaSyncHooks = [];
 
-    // Enable debugging
+    // Enable debugging (display queries using console.log etc)
     persistence.debug = true;
 
     persistence.subscribeToGlobalPropertyListener = function(coll, entityName, property) {
@@ -233,8 +240,57 @@ persistence.get = function(arg1, arg2) {
       this.objectsToRemove = {};
       this.globalPropertyListeners = {};
       this.queryCollectionCache = {};
-    }
+    };
 
+    /**
+     * asynchronous sequential version of Array.prototype.forEach
+     * @param array the array to iterate over
+     * @param fn the function to apply to each item in the array, function 
+     *        has two argument, the first is the item value, the second a 
+     *        callback function
+     * @param callback the function to call when the forEach has ended
+     */
+    persistence.asyncForEach = function(array, fn, callback) {
+      array = array.slice(0); // Just to be sure
+      function processOne() {
+        var item = array.pop();
+        fn(item, function(result) {
+            if(array.length > 0) {
+              processOne();
+            } else {
+              callback();
+            }
+          });
+      }
+      if(array.length > 0) {
+        processOne();
+      } else {
+        callback();
+      }
+    };
+
+    /**
+     * asynchronous parallel version of Array.prototype.forEach
+     * @param array the array to iterate over
+     * @param fn the function to apply to each item in the array, function 
+     *        has two argument, the first is the item value, the second a 
+     *        callback function
+     * @param callback the function to call when the forEach has ended
+     */
+    persistence.asyncParForEach = function(array, fn, callback) {
+      var completed = 0;
+      if(array.length === 0) {
+        callback();
+      }
+      for(var i = 0; i < array.length; i++) {
+        fn(array[i], function() {
+            completed++;
+            if(completed === array.length) {
+              callback();
+            }
+          });
+      }
+    };
 
     /**
      * Retrieves or creates an entity constructor function for a given
@@ -275,11 +331,13 @@ persistence.get = function(arg1, arg2) {
                 persistence.defineProp(that, f, function(val) {
                     // setterCallback
                     var oldValue = that._data[f];
-                    that._data[f] = val;
-                    that._dirtyProperties[f] = oldValue;
-                    that.triggerEvent('set', that, f, val);
-                    that.triggerEvent('change', that, f, val);
-                    session.propertyChanged(that, f, oldValue, val); 
+                    if(oldValue !== val) { // Don't mark properties as dirty and trigger events unnecessarily
+                      that._data[f] = val;
+                      that._dirtyProperties[f] = oldValue;
+                      that.triggerEvent('set', that, f, val);
+                      that.triggerEvent('change', that, f, val);
+                      session.propertyChanged(that, f, oldValue, val); 
+                    }
                   }, function() {
                     // getterCallback 
                     return that._data[f];
@@ -404,19 +462,177 @@ persistence.get = function(arg1, arg2) {
         return this.id == other.id;
       };
 
-      Entity.prototype.fetch = function(tx, rel, callback) {
+      Entity.prototype.toJSON = function() {
+        var json = {id: this.id};
+        for(var p in this._data) {
+          if(this._data.hasOwnProperty(p)) {
+            json[p] = this._data[p];
+          }
+        }
+        return json;
+      };
+
+
+      /**
+       * Select a subset of data as a JSON structure (Javascript object)
+       *
+       * A property specification is passed that selects the
+       * properties to be part of the resulting JSON object. Examples:
+       *    ['id', 'name'] -> Will return an object with the id and name property of this entity
+       *    ['*'] -> Will return an object with all the properties of this entity, not recursive
+       *    ['project.name'] -> will return an object with a project property which has a name 
+       *                        property containing the project name (hasOne relationship)
+       *    ['project.[id, name]'] -> will return an object with a project property which has an
+       *                              id and name property containing the project name
+       *                              (hasOne relationship)
+       *    ['tags.name'] -> will return an object with an array `tags` property containing 
+       *                     objects each with a single property: name
+       *
+       * @param tx database transaction to use, leave out to start a new one
+       * @param props a property specification
+       * @param callback(result)
+       */
+      Entity.prototype.selectJSON = function(tx, props, callback) {
+        var that = this;
         var args = argspec.getArgs(arguments, [
+            { name: "tx", optional: true, check: persistence.isTransaction, defaultValue: null },
+            { name: "props", optional: false },
+            { name: "callback", optional: false }
+          ]);
+        tx = args.tx;
+        props = args.props;
+        callback = args.callback;
+
+        if(!tx) {
+          this._session.transaction(function(tx) {
+              that.selectJSON(tx, props, callback);
+            });
+          return;
+        }
+        var includeProperties = {};
+        props.forEach(function(prop) {
+            var current = includeProperties;
+            var parts = prop.split('.');
+            for(var i = 0; i < parts.length; i++) {
+              var part = parts[i];
+              if(i === parts.length-1) {
+                if(part === '*') {
+                  current.id = true;
+                  for(var p in meta.fields) {
+                    if(meta.fields.hasOwnProperty(p)) {
+                      current[p] = true;
+                    }
+                  }
+                  for(var p in meta.hasOne) {
+                    if(meta.hasOne.hasOwnProperty(p)) {
+                      current[p] = true;
+                    }
+                  }
+                  for(var p in meta.hasMany) {
+                    if(meta.hasMany.hasOwnProperty(p)) {
+                      current[p] = true;
+                    }
+                  }
+                } else if(part[0] === '[') {
+                  part = part.substring(1, part.length-1);
+                  var propList = part.split(/,\s*/);
+                  propList.forEach(function(prop) {
+                      current[prop] = true;
+                    });
+                } else {
+                  current[part] = true;
+                }
+              } else {
+                current[part] = current[part] || {};
+                current = current[part];
+              }
+            }
+          });
+        buildJSON(this, tx, includeProperties, callback);
+      };
+
+      function buildJSON(that, tx, includeProperties, callback) {
+        var session = that._session;
+        var properties = [];
+        var meta = getMeta(that._type);
+        var fieldSpec = meta.fields;
+
+        for(var p in includeProperties) {
+          if(includeProperties.hasOwnProperty(p)) {
+            properties.push(p);
+          }
+        }
+
+        var cheapProperties = [];
+        var expensiveProperties = [];
+
+        properties.forEach(function(p) {
+            if(includeProperties[p] === true && !meta.hasMany[p]) { // simple, loaded field
+              cheapProperties.push(p);
+            } else {
+              expensiveProperties.push(p);
+            }
+          });
+
+        var itemData = that._data;
+        var item = {};
+
+        cheapProperties.forEach(function(p) {
+            if(p === 'id') {
+              item.id = that.id;
+            } else if(meta.hasOne[p]) {
+              item[p] = {id: itemData[p]};
+            } else {
+              item[p] = persistence.entityValToJson(itemData[p], fieldSpec[p]);
+            }
+          });
+        properties = expensiveProperties.slice();
+
+        persistence.asyncForEach(properties, function(p, callback) {
+          if(meta.hasOne[p]) {
+            that.fetch(session, tx, p, function(obj) {
+                buildJSON(obj, tx, includeProperties[p], function(result) {
+                    item[p] = result;
+                    callback();
+                  });
+              });
+          } else if(meta.hasMany[p]) {
+            persistence.get(that, p).list(function(objs) {
+                item[p] = [];
+                persistence.asyncForEach(objs, function(obj, callback) {
+                    var obj = objs.pop();
+                    if(includeProperties[p] === true) {
+                      item[p].push({id: obj.id});
+                      callback();
+                    } else {
+                      buildJSON(obj, tx, includeProperties[p], function(result) {
+                          item[p].push(result);
+                          callback();
+                        });
+                    }
+                  }, callback);
+              });
+          }
+        }, function() {
+          callback(item);
+        });
+      }; // End of buildJson
+
+      Entity.prototype.fetch = function(session, tx, rel, callback) {
+        var args = argspec.getArgs(arguments, [
+            { name: 'session', optional: true, check: persistence.isSession, defaultValue: persistence },
             { name: 'tx', optional: true, check: persistence.isTransaction, defaultValue: null },
             { name: 'rel', optional: false, check: argspec.hasType('string') },
             { name: 'callback', optional: false, check: argspec.isCallback() }
           ]);
+        session = args.session;
         tx = args.tx;
         rel = args.rel;
         callback = args.callback;
 
         var that = this;
         if(!tx) {
-          this._session.transaction(function(tx) {
+          session.transaction(function(tx) {
               that.fetch(tx, rel, callback);
             });
           return;
@@ -453,7 +669,80 @@ persistence.get = function(arg1, arg2) {
       Entity.all = function(session) {
         session = session || persistence;
         return session.uniqueQueryCollection(new AllDbQueryCollection(session, entityName));
-      }
+      };
+
+      Entity.fromSelectJSON = function(session, tx, jsonObj, callback) {
+        var args = argspec.getArgs(arguments, [
+            { name: 'session', optional: true, check: persistence.isSession, defaultValue: persistence },
+            { name: 'tx', optional: true, check: persistence.isTransaction, defaultValue: null },
+            { name: 'jsonObj', optional: false },
+            { name: 'callback', optional: false, check: argspec.isCallback() }
+          ]);
+        session = args.session;
+        tx = args.tx;
+        jsonObj = args.jsonObj;
+        callback = args.callback;
+
+        if(!tx) {
+          session.transaction(function(tx) {
+              Entity.fromSelectJSON(session, tx, jsonObj, callback);
+            });
+          return;
+        }
+
+        if(typeof jsonObj === 'string') {
+          jsonObj = JSON.parse(jsonObj);
+        }
+
+        function loadedObj(obj) {
+          if(!obj) {
+            obj = new Entity();
+            if(jsonObj.id) {
+              obj.id = jsonObj.id;
+            }
+          }
+          var expensiveProperties = [];
+          for(var p in jsonObj) {
+            if(jsonObj.hasOwnProperty(p)) {
+              if(p === 'id') {
+                continue;
+              } else if(meta.fields[p]) { // regular field
+                persistence.set(obj, p, persistence.jsonToEntityVal(jsonObj[p], meta.fields[p]));
+              } else {
+                expensiveProperties.push(p);
+              }
+            }
+          }
+          persistence.asyncForEach(expensiveProperties, function(prop, callback) {
+              var prop = expensiveProperties.pop();
+              if(meta.hasOne[p]) {
+                meta.hasOne[p].type.fromSelectJSON(session, tx, jsonObj[p], function(result) {
+                    persistence.set(obj, p, result);
+                    callback();
+                  });
+            } else if(meta.hasMany[p]) {
+              var coll = persistence.get(obj, p);
+              var ar = jsonObj[p].slice(0);
+              var PropertyEntity = meta.hasMany[p].type;
+              persistence.asyncForEach(ar, function(item, callback) {
+                  PropertyEntity.fromSelectJSON(session, tx, item, function(result) {
+                      coll.add(result);
+                      callback();
+                    });
+                }, function() {
+                  callback();
+                });
+            }
+          }, function() {
+            callback(obj);
+          });
+        }
+        if(jsonObj.id) {
+          Entity.load(session, tx, jsonObj.id, loadedObj);
+        } else {
+          loadedObj(new Entity());
+        }
+      };
 
       Entity.load = function(session, tx, id, callback) {
         var args = argspec.getArgs(arguments, [
@@ -489,7 +778,7 @@ persistence.get = function(arg1, arg2) {
             });
           return;
         }
-        Entity.all().filter(property, "=", value).one(tx, function(obj) {
+        Entity.all(session).filter(property, "=", value).one(tx, function(obj) {
             callback(obj);
           });
       }
@@ -556,6 +845,38 @@ persistence.get = function(arg1, arg2) {
       return Entity;
     }
 
+    persistence.jsonToEntityVal = function(value, type) {
+      if(type) {
+        switch(type) {
+        case 'DATE': 
+          return new Date(value * 1000); 
+          break;
+        default:
+          return value;
+        }
+      } else {
+        return value;
+      }
+    };
+
+    persistence.entityValToJson = function(value, type) {
+      if(type) {
+        switch(type) {
+        case 'DATE': 
+          if(value) {
+            return Math.round(value.getTime() / 1000);
+          } else {
+            return null;
+          }
+          break;
+        default:
+          return value;
+        }
+      } else {
+        return value;
+      }
+    };
+
     /**
      * Dumps the entire database into an object (that can be serialized to JSON for instance)
      * @param tx transaction to use, use `null` to start a new one
@@ -565,7 +886,7 @@ persistence.get = function(arg1, arg2) {
     persistence.dump = function(tx, entities, callback) {
       var args = argspec.getArgs(arguments, [
           { name: 'tx', optional: true, check: persistence.isTransaction, defaultValue: null },
-          { name: 'entities', optional: true, check: function(obj) { return entities.length; } },
+          { name: 'entities', optional: true, check: function(obj) { return obj && obj.length; }, defaultValue: null },
           { name: 'callback', optional: false, check: argspec.isCallback(), defaultValue: function(){} }
         ]);
       tx = args.tx;
@@ -592,7 +913,7 @@ persistence.get = function(arg1, arg2) {
                     var fields = Entity.meta.fields;
                     for(var f in fields) {
                       if(fields.hasOwnProperty(f)) {
-                        rec[f] = e._data[f];
+                        rec[f] = persistence.entityValToJson(e._data[f], fields[f]);
                       }
                     }
                     var refs = Entity.meta.hasOne;
@@ -623,7 +944,7 @@ persistence.get = function(arg1, arg2) {
       var args = argspec.getArgs(arguments, [
           { name: 'tx', optional: true, check: persistence.isTransaction, defaultValue: null },
           { name: 'dump', optional: false },
-          { name: 'callback', optional: false, check: argspec.isCallback(), defaultValue: function(){} }
+          { name: 'callback', optional: true, check: argspec.isCallback(), defaultValue: function(){} }
         ]);
       tx = args.tx;
       dump = args.dump;
@@ -633,6 +954,7 @@ persistence.get = function(arg1, arg2) {
       for(var entityName in dump) {
         if(dump.hasOwnProperty(entityName)) {
           var Entity = getEntity(entityName);
+          var fields = Entity.meta.fields;
           var instances = dump[entityName];
           for(var i = 0; i < instances.length; i++) {
             var instance = instances[i];
@@ -642,7 +964,7 @@ persistence.get = function(arg1, arg2) {
                 if (persistence.isImmutable(p)) {
                   ent[p] = instance[p];  
                 } else {
-                  persistence.set(ent, p, instance[p])
+                  persistence.set(ent, p, persistence.jsonToEntityVal(instance[p], fields[p]));
                 }  
               }
             }
@@ -660,6 +982,14 @@ persistence.get = function(arg1, arg2) {
      * @param callback (jsonDump) the callback function called with the results.
      */
     persistence.dumpToJson = function(tx, entities, callback) {
+      var args = argspec.getArgs(arguments, [
+          { name: 'tx', optional: true, check: persistence.isTransaction, defaultValue: null },
+          { name: 'entities', optional: true, check: function(obj) { return obj && obj.length; }, defaultValue: null },
+          { name: 'callback', optional: false, check: argspec.isCallback(), defaultValue: function(){} }
+        ]);
+      tx = args.tx;
+      entities = args.entities;
+      callback = args.callback;
       this.dump(tx, entities, function(obj) {
           callback(JSON.stringify(obj));
         });
@@ -672,13 +1002,25 @@ persistence.get = function(arg1, arg2) {
      * @param callback the callback function called when done.
      */
     persistence.loadFromJson = function(tx, jsonDump, callback) {
+      var args = argspec.getArgs(arguments, [
+          { name: 'tx', optional: true, check: persistence.isTransaction, defaultValue: null },
+          { name: 'jsonDump', optional: false },
+          { name: 'callback', optional: true, check: argspec.isCallback(), defaultValue: function(){} }
+        ]);
+      tx = args.tx;
+      jsonDump = args.jsonDump;
+      callback = args.callback;
       this.load(tx, JSON.parse(jsonDump), callback);
     };
+
 
     /**
      * Generates a UUID according to http://www.ietf.org/rfc/rfc4122.txt
      */
     function createUUID () {
+      if(persistence.typeMapper && persistence.typeMapper.newUuid) {
+        return persistence.typeMapper.newUuid();
+      }
       var s = [];
       var hexDigits = "0123456789ABCDEF";
       for ( var i = 0; i < 32; i++) {
@@ -691,13 +1033,24 @@ persistence.get = function(arg1, arg2) {
       return uuid;
     }
 
+    persistence.createUUID = createUUID;
+
 
     function defaultValue(type) {
+      if(persistence.typeMapper && persistence.typeMapper.defaultValue) {
+        return persistence.typeMapper.defaultValue(type);
+      }
       switch(type) {
       case "TEXT": return "";
-      case "INT": return 0;
       case "BOOL": return false;
-      default: return null;
+      default: 
+        if(type.indexOf("INT") !== -1) {
+          return 0;
+        } else if(type.indexOf("CHAR") !== -1) {
+          return "";
+        } else {
+          return null;
+        }
       }
     }
 
@@ -958,6 +1311,7 @@ persistence.get = function(arg1, arg2) {
       this._constructor = constructor;
       this._limit = -1;
       this._skip = 0;
+      this._reverse = false;
       this._session = session || persistence;
       // For observable
       this.subscribers = {};
@@ -985,6 +1339,8 @@ persistence.get = function(arg1, arg2) {
       s += this._limit;
       s += '|Skip:';
       s += this._skip;
+      s += '|Reverse:';
+      s += this._reverse;
       return s;
     };
 
@@ -999,6 +1355,7 @@ persistence.get = function(arg1, arg2) {
       c._orderColumns = this._orderColumns.slice(0);
       c._limit = this._limit;
       c._skip = this._skip;
+      c._reverse = this._reverse;
       if(cloneSubscribers) {
         var subscribers = {};
         for(var eventType in this.subscribers) {
@@ -1066,7 +1423,17 @@ persistence.get = function(arg1, arg2) {
       return this._session.uniqueQueryCollection(c);
     };
 
-    /*
+    /**
+     * Returns a new query collection which reverse the order of the result set
+     * @return the query collection that will reverse its items
+     */
+    QueryCollection.prototype.reverse = function() {
+      var c = this.clone();
+      c._reverse = true;
+      return this._session.uniqueQueryCollection(c);
+    };
+
+    /**
      * Returns a new query collection which will prefetch a certain object relationship.
      * Only works with 1:1 and N:1 relations.
      * @param rel the relation name of the relation to prefetch
@@ -1076,6 +1443,48 @@ persistence.get = function(arg1, arg2) {
       var c = this.clone();
       c._prefetchFields.push(rel);
       return this._session.uniqueQueryCollection(c);
+    };
+
+
+    /**
+     * Select a subset of data, represented by this query collection as a JSON 
+     * structure (Javascript object)
+     *
+     * @param tx database transaction to use, leave out to start a new one
+     * @param props a property specification
+     * @param callback(result)
+     */
+    QueryCollection.prototype.selectJSON = function(tx, props, callback) {
+      var args = argspec.getArgs(arguments, [
+          { name: "tx", optional: true, check: persistence.isTransaction, defaultValue: null },
+          { name: "props", optional: false },
+          { name: "callback", optional: false }
+        ]);
+      var session = this._session;
+      var that = this;
+      tx = args.tx;
+      props = args.props;
+      callback = args.callback;
+
+      if(!tx) {
+        session.transaction(function(tx) {
+            that.selectJSON(tx, props, callback);
+          });
+        return;
+      }
+      var Entity = getEntity(this._entityName);
+      // TODO: This could do some clever prefetching to make it more efficient
+      this.list(function(items) {
+          var resultArray = [];
+          persistence.asyncForEach(items, function(item, callback) {
+              item.selectJSON(tx, props, function(obj) {
+                  resultArray.push(obj);
+                  callback();
+                });
+            }, function() {
+              callback(resultArray);
+            });
+        });
     };
 
     /**
@@ -1300,6 +1709,9 @@ persistence.get = function(arg1, arg2) {
       if(this._limit > -1) {
         results = results.slice(0, this._limit);
       }
+      if(this._reverse) {
+        results.reverse();
+      }
       if(callback) {
         callback(results);
       } else {
@@ -1339,11 +1751,6 @@ persistence.get = function(arg1, arg2) {
     persistence.Observable                  = Observable;
 
   }());
-
-try {
-  exports.persistence = persistence;
-} catch(e) {}
-
 
 // ArgSpec.js library: http://github.com/zefhemel/argspecjs
 var argspec = {};
@@ -1400,6 +1807,11 @@ var argspec = {};
 
 persistence.argspec = argspec;
 
+  return persistence;
+} // end of createPersistence
+
+
+
 // JSON2 library, source: http://www.JSON.org/js.html
 // Most modern browsers already support this natively, but mobile
 // browsers often don't, hence this implementation
@@ -1407,7 +1819,10 @@ persistence.argspec = argspec;
 //    JSON.stringify(value, replacer, space)
 //    JSON.parse(text, reviver)
 
-var JSON = (window && window.JSON) ? window.JSON : {};
+if(typeof JSON === 'undefined') {
+  JSON = {};
+}
+//var JSON = typeof JSON === 'undefined' ? window.JSON : {};
 if (!JSON.stringify) {
   (function () {
       function f(n) {
