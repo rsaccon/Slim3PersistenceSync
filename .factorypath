@@ -1,3 +1,4 @@
 <factorypath>
-    <factorypathentry kind="WKSPJAR" id="/Slim3PersistenceSync/lib/slim3-gen-1.0.5.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="WKSPJAR" id="/persistencejs-gen/target/slim3-gen-1.0.5.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="WKSPJAR" id="/Slim3PersistenceSync/lib/slim3-gen-1.0.5.jar" enabled="false" runInBatchMode="false"/>
 </factorypath>
