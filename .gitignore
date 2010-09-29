@@ -1,6 +1,4 @@
 war/WEB-INF/classes
 war/WEB-INF/appengine-generated
 
-src/slim3/meta/ProjectMeta.java
-src/slim3/meta/TagMeta.java
-src/slim3/meta/TaskMeta.java
+src/slim3/meta
