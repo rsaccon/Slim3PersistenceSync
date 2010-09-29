@@ -6,8 +6,10 @@ It currently just runs the presistencejs sync testsuite.
 
 Requirements / dependencies to run the demo: 
 --------------------------------------------
-eclipse with appengine plugin
+* eclipse with appengine plugin
+
 In same folder as this project:
+
 * Annotation-extension:  http://github.com/rsaccon/persistencejs-gen
 * Runtime-lib: http://github.com/rsaccon/persistencejs-sync
 
