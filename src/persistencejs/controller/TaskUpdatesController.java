@@ -60,8 +60,9 @@ public class TaskUpdatesController extends Controller {
             for (int i = 0; i < arr.length(); i++) {
                 Task task = TaskMeta.get().JSONtoModel(
                     arr.getJSONObject(i), timestamp);
-                task.setSyncDirty(false);
+                task.setSyncDirty(true);
                 Datastore.put(task);
+                task.setSyncDirty(false);
             }
 
             response.getWriter().write(

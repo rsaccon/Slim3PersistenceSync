@@ -24,6 +24,9 @@ public class Task implements Serializable {
     private Long version;
     
     @Attribute(persistent = false)
+    private boolean dirty = false;
+    
+    @Attribute(persistent = false)
     private boolean syncDirty = false;
     
     @Attribute(listener = CreatedDate.class)
@@ -115,7 +118,7 @@ public class Task implements Serializable {
 
     public void setName(String name) {
         if (((this.name == null) && (name != null)) || ((this.name != null) && !this.name.equals(name))) {
-            syncDirty = true;
+            dirty = true;
         }
         this.name = name;
     }
@@ -126,7 +129,7 @@ public class Task implements Serializable {
 
     public void setDone(boolean done) {
         if (this.done != done) {
-            syncDirty = true;    
+            dirty = true;    
         }
         this.done = done;
     }
@@ -151,6 +154,14 @@ public class Task implements Serializable {
         return lastChange;
     }
     
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
+    }
+
+    public boolean isDirty() {
+        return dirty;
+    }
+
     public void setSyncDirty(boolean syncDirty) {
         this.syncDirty = syncDirty;
     }

@@ -59,8 +59,9 @@ public class TagUpdatesController extends Controller {
             for (int i = 0; i < arr.length(); i++) {
                 Tag tag = TagMeta.get().JSONtoModel(
                     arr.getJSONObject(i), timestamp);
-                tag.setSyncDirty(false);
+                tag.setSyncDirty(true);
                 Datastore.put(tag);
+                tag.setSyncDirty(false);
             }
 
             response.getWriter().write(

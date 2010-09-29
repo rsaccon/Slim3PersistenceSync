@@ -33,6 +33,9 @@ public class Project implements Serializable {
     private String name;
     
     @Attribute(persistent = false)
+    private boolean dirty = false;
+    
+    @Attribute(persistent = false)
     private boolean syncDirty = false;
     
     @Attribute(persistent = false)
@@ -108,7 +111,7 @@ public class Project implements Serializable {
 
     public void setName(String name) {
         if (((this.name == null) && (name != null)) || ((this.name != null) && !this.name.equals(name))) {
-            syncDirty = true;
+            dirty = true;
         }
         this.name = name;
     }
@@ -127,6 +130,14 @@ public class Project implements Serializable {
 
     public Long getLastChange() {
         return lastChange;
+    }
+
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
+    }
+
+    public boolean isDirty() {
+        return dirty;
     }
 
     public void setSyncDirty(boolean syncDirty) {

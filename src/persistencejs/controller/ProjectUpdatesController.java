@@ -61,8 +61,9 @@ public class ProjectUpdatesController extends Controller {
             for (int i = 0; i < arr.length(); i++) {
                 Project project = ProjectMeta.get().JSONtoModel(
                     arr.getJSONObject(i), timestamp);
-                project.setSyncDirty(false);
+                project.setSyncDirty(true);
                 Datastore.put(project);
+                project.setSyncDirty(false);
             }
 
             response.getWriter().write(

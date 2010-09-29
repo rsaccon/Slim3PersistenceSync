@@ -7,15 +7,11 @@ It currently just runs the presistencejs sync testsuite.
 Requirements / dependencies: 
 ----------------------------
 eclipse with appengine plugin
-In same folder as this project:
-  http://github.com/rsaccon/persistencejs-gen
-  http://github.com/rsaccon/persistencejs-sync
+In same folder as this projects:
+  Annotation-extension:  http://github.com/rsaccon/persistencejs-gen
+  Runtime-lib: http://github.com/rsaccon/persistencejs-sync
 
 Testsuite:
 ----------
 To run the testsuite, import this project (and required dependencies) into eclipse, start the server 
 and point your browser to the server address.
-
-Howto:
------
-see sourcecode

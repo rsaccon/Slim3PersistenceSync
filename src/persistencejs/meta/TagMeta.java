@@ -1,6 +1,6 @@
 package persistencejs.meta;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2010-09-28 14:43:36")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2010-09-29 03:58:58")
 /** */
 public final class TagMeta extends org.slim3.datastore.ModelMeta<persistencejs.model.Tag> {
 
@@ -106,9 +106,9 @@ public final class TagMeta extends org.slim3.datastore.ModelMeta<persistencejs.m
         incrementVersion(model);
         persistencejs.model.Tag m = (persistencejs.model.Tag) model;
         m.setCreatedDate(slim3_createdDateAttributeListener.prePut(m.getCreatedDate()));
-        if (m.isSyncDirty()) {
+        if (m.isDirty() && !m.isSyncDirty()) {
             m.setLastChange(new java.util.Date().getTime());
-            m.setSyncDirty(false);
+            m.setDirty(false);
         }
     }
 
