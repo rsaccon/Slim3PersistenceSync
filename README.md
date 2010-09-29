@@ -1,7 +1,7 @@
 Serverside sync (in Java / on appengine) for persistencejs
 ==========================================================
 
-This a Java serverside for the pesistncejs.sync testsuite, on top of slim3 appengine framework.
+This a Java serverside for the persistencejs.sync testsuite, on top of slim3 appengine framework.
 
 Requirements / dependencies to run the demo: 
 --------------------------------------------
