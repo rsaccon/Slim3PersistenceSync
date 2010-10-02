@@ -25,9 +25,9 @@ If started from a blank-project, the following additional setup steps are necess
 * Use the build.xml provided by this project.
 * Use the gen-persistencejs-sync task to create synced model and associated controller.
 * Add fields to models as usual, use Sync annotation to mark fields for sync
-* IMPORTANT: You still have to insert manually code to set dirty attributes inside the setters for synced attributes, see demo sourcecode for examples.
+* IMPORTANT: You still have to set by hand conditionally the dirty attribute inside setters for synced attributes, see demo sourcecode for examples.
 
 TODO:
 -----
 * Create sync-specific blank project
-* Eliminate the need to insert manually code to set dirty attributes inside the setters for synced attributes.
+* Decrease the amount of boilerplate code needed to set by hand the dirty attribute inside setters for synced attributes.
