@@ -1,7 +1,7 @@
 Serverside sync (in Java / on appengine) for persistencejs
 ==========================================================
 
-This a Java serverside for the [persistencejs](http://github.com/zef/persistencejs).sync testsuite, on top of slim3 appengine framework.
+This a Java serverside for the [persistencejs](http://github.com/zef/persistencejs).sync, for demo puropose just running the sync testsuite. I it is based on the [slim3](http://code.google.com/p/slim3) appengine framework.
 
 Requirements / dependencies to run the demo: 
 --------------------------------------------
@@ -9,10 +9,10 @@ Requirements / dependencies to run the demo:
 
 In same folder as this project:
 
-* [Annotation-processing-extension and ant-task code generator](http://github.com/rsaccon/persistencejs-gen)
-* [Runtime-lib](http://github.com/rsaccon/persistencejs-sync)
+* Annotation-processing-extension and ant-task code generator: [http://github.com/rsaccon/persistencejs-gen](http://github.com/rsaccon/persistencejs-gen)
+* Runtime-lib: [http://github.com/rsaccon/persistencejs-sync](http://github.com/rsaccon/persistencejs-sync)
 
-Hoe to run the demo
+How to run the demo
 -------------------
 Import this project (and required dependencies) into eclipse, start the server 
 and point your browser to the server address.
