@@ -1,6 +1,6 @@
 package persistencejs.meta;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2010-09-29 03:58:58")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2010-10-02 09:54:18")
 /** */
 public final class TaskMeta extends org.slim3.datastore.ModelMeta<persistencejs.model.Task> {
 
