@@ -2,3 +2,7 @@ war/WEB-INF/classes
 war/WEB-INF/appengine-generated
 
 src/slim3/meta
+
+build/test-classes/WEB-INF/appengine-generated
+
+
