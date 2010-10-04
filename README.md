@@ -47,4 +47,4 @@ If started from a blank-project, the following additional setup steps are necess
 TODO:
 -----
 * Create sync-specific blank project
-* Add junit-tests which test for models wit synced fields whether all setters are replaced with meta setters.
+* Add junit-tests which test for models wit synced fields whether contain the meta.syncXXX(field).
