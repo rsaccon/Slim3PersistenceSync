@@ -10,6 +10,7 @@ import org.slim3.datastore.Attribute;
 import org.slim3.datastore.Model;
 import org.slim3.datastore.ModelRef;
 
+import persistencejs.meta.TaskMeta;
 import persistencejs.utils.CreatedDate;
 
 @Model(schemaVersion = 1)
@@ -117,10 +118,7 @@ public class Task implements Serializable {
     }
 
     public void setName(String name) {
-        if (((this.name == null) && (name != null)) || ((this.name != null) && !this.name.equals(name))) {
-            dirty = true;
-        }
-        this.name = name;
+        TaskMeta.get().setName(this, name);  
     }
 
     public String getName() {
@@ -128,10 +126,7 @@ public class Task implements Serializable {
     }
 
     public void setDone(boolean done) {
-        if (this.done != done) {
-            dirty = true;    
-        }
-        this.done = done;
+        TaskMeta.get().setDone(this, done);
     }
 
     public boolean isDone() {

@@ -8,6 +8,7 @@ import org.slim3.datastore.Attribute;
 import org.slim3.datastore.InverseModelListRef;
 import org.slim3.datastore.Model;
 
+import persistencejs.meta.ProjectMeta;
 import persistencejs.utils.CreatedDate;
 
 import com.google.appengine.api.datastore.Key;
@@ -110,10 +111,7 @@ public class Project implements Serializable {
     }
 
     public void setName(String name) {
-        if (((this.name == null) && (name != null)) || ((this.name != null) && !this.name.equals(name))) {
-            dirty = true;
-        }
-        this.name = name;
+        ProjectMeta.get().setName(this, name);   
     }
 
     public String getName() {

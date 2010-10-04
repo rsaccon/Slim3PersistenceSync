@@ -23,8 +23,8 @@ public class TaskUpdatesController extends Controller {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");       
         
-        if (isGet()) {
-            TaskMeta meta = TaskMeta.get();
+        TaskMeta meta = TaskMeta.get();
+        if (isGet()) { 
             Iterator<Task> taskIterator =
                 Datastore
                     .query(meta)
@@ -35,7 +35,7 @@ public class TaskUpdatesController extends Controller {
             JSONArray arr = new JSONArray();
 
             while (taskIterator.hasNext()) {
-                arr.put(TaskMeta.get().modelToJSON(taskIterator.next()));
+                arr.put(meta.modelToJSON(taskIterator.next()));
             }
 
             response.getWriter().write(
@@ -58,7 +58,7 @@ public class TaskUpdatesController extends Controller {
             long timestamp = new Date().getTime();
 
             for (int i = 0; i < arr.length(); i++) {
-                Task task = TaskMeta.get().JSONtoModel(
+                Task task = meta.JSONtoModel(
                     arr.getJSONObject(i), timestamp);
                 task.setSyncDirty(true);
                 Datastore.put(task);

@@ -23,8 +23,8 @@ public class ProjectUpdatesController extends Controller {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
+        ProjectMeta meta = ProjectMeta.get();
         if (isGet()) {
-            ProjectMeta meta = ProjectMeta.get();
             Iterator<Project> projectIterator =
                 Datastore
                     .query(meta)
@@ -35,7 +35,7 @@ public class ProjectUpdatesController extends Controller {
             JSONArray arr = new JSONArray();
 
             while (projectIterator.hasNext()) {
-                arr.put(ProjectMeta.get().modelToJSON(projectIterator.next()));
+                arr.put(meta.modelToJSON(projectIterator.next()));
             }
 
             response.getWriter().write(
@@ -59,7 +59,7 @@ public class ProjectUpdatesController extends Controller {
             long timestamp = new Date().getTime();
 
             for (int i = 0; i < arr.length(); i++) {
-                Project project = ProjectMeta.get().JSONtoModel(
+                Project project = meta.JSONtoModel(
                     arr.getJSONObject(i), timestamp);
                 project.setSyncDirty(true);
                 Datastore.put(project);

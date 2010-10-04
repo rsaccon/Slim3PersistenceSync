@@ -1,6 +1,6 @@
 package persistencejs.meta;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2010-10-02 09:54:18")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2010-10-04 03:40:55")
 /** */
 public final class TaskMeta extends org.slim3.datastore.ModelMeta<persistencejs.model.Task> {
 
@@ -214,6 +214,20 @@ public final class TaskMeta extends org.slim3.datastore.ModelMeta<persistencejs.
 
     public String getNameOrId(com.google.appengine.api.datastore.Key key) {
         return (key.getName() == null) ? Long.toString(key.getId()) : key.getName();
+    }
+
+    public void setDone(persistencejs.model.Task task, boolean done) {
+        if (task.isDone() != done) {
+            task.setDirty(true);
+        }
+        task.setDone(done);
+    }
+
+    public void setName(persistencejs.model.Task task, java.lang.String name) {
+        if (((task.getName() == null) && (name != null)) || ((task.getName() != null) && !task.getName().equals(name))) {
+            task.setDirty(true);
+        }
+        task.setName(name);
     }
 
 }

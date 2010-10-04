@@ -22,8 +22,8 @@ public class TagUpdatesController extends Controller {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");       
 
+        TagMeta meta = TagMeta.get();
         if (isGet()) {
-            TagMeta meta = TagMeta.get();
             Iterator<Tag> projectIterator =
                 Datastore
                     .query(meta)
@@ -34,7 +34,7 @@ public class TagUpdatesController extends Controller {
             JSONArray arr = new JSONArray();
 
             while (projectIterator.hasNext()) {
-                arr.put(TagMeta.get().modelToJSON(projectIterator.next()));
+                arr.put(meta.modelToJSON(projectIterator.next()));
             }
 
             response.getWriter().write(
@@ -57,7 +57,7 @@ public class TagUpdatesController extends Controller {
             long timestamp = new Date().getTime();
             
             for (int i = 0; i < arr.length(); i++) {
-                Tag tag = TagMeta.get().JSONtoModel(
+                Tag tag = meta.JSONtoModel(
                     arr.getJSONObject(i), timestamp);
                 tag.setSyncDirty(true);
                 Datastore.put(tag);

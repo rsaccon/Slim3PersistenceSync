@@ -1,6 +1,6 @@
 package persistencejs.meta;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2010-10-02 09:54:19")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2010-10-04 03:40:55")
 /** */
 public final class ProjectMeta extends org.slim3.datastore.ModelMeta<persistencejs.model.Project> {
 
@@ -157,6 +157,13 @@ public final class ProjectMeta extends org.slim3.datastore.ModelMeta<persistence
 
     public String getNameOrId(com.google.appengine.api.datastore.Key key) {
         return (key.getName() == null) ? Long.toString(key.getId()) : key.getName();
+    }
+
+    public void setName(persistencejs.model.Project project, java.lang.String name) {
+        if (((project.getName() == null) && (name != null)) || ((project.getName() != null) && !project.getName().equals(name))) {
+            project.setDirty(true);
+        }
+        project.setName(name);
     }
 
 }
