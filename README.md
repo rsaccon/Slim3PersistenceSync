@@ -40,4 +40,4 @@ If started from a blank-project, the following additional setup steps are necess
 TODO:
 -----
 * Create sync-specific blank project
-* Decrease the amount of boilerplate code needed to set by hand the dirty attribute inside setters for synced attributes.
+* Add junit-tests which test for models wit synced fields whether all setters are replaced with meta setters.
