@@ -46,5 +46,7 @@ If started from a blank-project, the following additional setup steps are necess
 
 TODO:
 -----
+* generate meta.syncXXX(this, ...) functions for all primitives 
 * Create sync-specific blank project
-* Add junit-tests which test for models wit synced fields whether contain the meta.syncXXX(field).
+* Add junit-tests which test for models wit synced fields whether contain the meta.syncXXX(this, ...) function.
+
