@@ -111,7 +111,8 @@ public class Project implements Serializable {
     }
 
     public void setName(String name) {
-        ProjectMeta.get().setName(this, name);   
+        ProjectMeta.get().syncName(this, name);  
+        this.name = name;
     }
 
     public String getName() {

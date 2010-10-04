@@ -118,7 +118,8 @@ public class Task implements Serializable {
     }
 
     public void setName(String name) {
-        TaskMeta.get().setName(this, name);  
+        TaskMeta.get().syncName(this, name); 
+        this.name = name;
     }
 
     public String getName() {
@@ -126,7 +127,8 @@ public class Task implements Serializable {
     }
 
     public void setDone(boolean done) {
-        TaskMeta.get().setDone(this, done);
+        TaskMeta.get().syncDone(this, done);
+        this.done = done;
     }
 
     public boolean isDone() {

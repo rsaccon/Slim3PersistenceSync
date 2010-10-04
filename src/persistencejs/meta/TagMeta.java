@@ -1,6 +1,6 @@
 package persistencejs.meta;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2010-10-04 03:40:55")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2010-10-04 04:55:46")
 /** */
 public final class TagMeta extends org.slim3.datastore.ModelMeta<persistencejs.model.Tag> {
 
@@ -183,11 +183,10 @@ public final class TagMeta extends org.slim3.datastore.ModelMeta<persistencejs.m
         return (key.getName() == null) ? Long.toString(key.getId()) : key.getName();
     }
 
-    public void setName(persistencejs.model.Tag tag, java.lang.String name) {
+    public void syncName(persistencejs.model.Tag tag, java.lang.String name) {
         if (((tag.getName() == null) && (name != null)) || ((tag.getName() != null) && !tag.getName().equals(name))) {
             tag.setDirty(true);
         }
-        tag.setName(name);
     }
 
 }

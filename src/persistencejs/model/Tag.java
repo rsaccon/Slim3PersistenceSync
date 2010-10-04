@@ -9,6 +9,7 @@ import org.slim3.datastore.InverseModelListRef;
 import org.slim3.datastore.Model;
 import org.slim3.datastore.ModelRef;
 
+import persistencejs.meta.TagMeta;
 import persistencejs.utils.CreatedDate;
 
 import com.google.appengine.api.datastore.Key;
@@ -114,9 +115,7 @@ public class Tag implements Serializable {
     }
 
     public void setName(String name) {
-        if (((this.name == null) && (name != null)) || ((this.name != null) && !this.name.equals(name))) {
-            dirty = true;
-        }
+        TagMeta.get().syncName(this, name);
         this.name = name;
     }
 
