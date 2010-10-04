@@ -27,16 +27,22 @@ If started from a blank-project, the following additional setup steps are necess
 * Add fields to models as usual, use Sync annotation to mark fields for sync
 * *IMPORTANT*: After generating setter/getter for new fields, insert at the setter body a meta function (which checks/sets a dirty field), see Example below:
 
+<pre>
 	public class MyModel implements Serializable {
-		// ...
+		
+		// ... cutted out
+		
 		@Sync
     	private String foo;
-		// ...
+		
+		// ... cutted out
+		
 		public void setFoo(String foo) {
         	MyModelMeta.get().syncFoo(this, foo);  // <== add this !!!
         	this.foo = foo;
     	}
     }
+</pre>
 
 TODO:
 -----
