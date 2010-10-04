@@ -25,7 +25,7 @@ If started from a blank-project, the following additional setup steps are necess
 * Use the build.xml provided by this project.
 * Use the gen-persistencejs-sync task to create synced model and associated controller.
 * Add fields to models as usual, use Sync annotation to mark fields for sync
-* *IMPORTANT*: After generating setter/getter for new fields, insert at the setter body a meta function (which checks/sets a dirty field), see Example below:
+* *IMPORTANT*: After generating setter/getter for new fields, insert at the setter body a meta function (which checks/sets a dirty field), see example below:
 
 <pre>
 	public class MyModel implements Serializable {
@@ -38,7 +38,7 @@ If started from a blank-project, the following additional setup steps are necess
 		// ... cutted out
 		
 		public void setFoo(String foo) {
-        	MyModelMeta.get().syncFoo(this, foo);  // <== add this !!!
+        	MyModelMeta.get().syncFoo(this, foo);  // <<< add this !!!
         	this.foo = foo;
     	}
     }
