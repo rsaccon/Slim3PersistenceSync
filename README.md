@@ -27,7 +27,7 @@ If started from a blank-project, the following additional setup steps are necess
 * Add fields to models as usual, use Sync annotation to mark fields for sync
 * *IMPORTANT*: After generating setter/getter for new fields, insert at the setter body a meta function (which checks/sets a dirty field), see example below:
 
-<pre>
+<code>
 	public class MyModel implements Serializable {
 		
 		// ... cutted out
@@ -42,7 +42,7 @@ If started from a blank-project, the following additional setup steps are necess
         	this.foo = foo;
     	}
     }
-</pre>
+</code>
 
 TODO:
 -----
