@@ -7,7 +7,7 @@ Requirements / dependencies to run the demo:
 --------------------------------------------
 * eclipse with appengine plugin
 
-In same folder as this project:
+Eclipse projects (must be in same folder as this project):
 
 * Annotation-processing-extension and ant-task code generator: [http://github.com/rsaccon/persistencejs-gen](http://github.com/rsaccon/persistencejs-gen)
 * Runtime-lib: [http://github.com/rsaccon/persistencejs-sync](http://github.com/rsaccon/persistencejs-sync)
@@ -19,7 +19,7 @@ and point your browser to the server address.
 
 Custom projects
 ---------------
-If started from a blank-project, the following additional setup steps are necessary
+If started from a slim3-blank project, the following additional setup steps are necessary
 
 * Set annotation factory path (at the project java compiler settings) to persistencejs-gen jar (built by [persistencejs-gen](http://github.com/rsaccon/persistencejs-gen)).
 * Use the build.xml provided by this project.
@@ -30,23 +30,18 @@ If started from a blank-project, the following additional setup steps are necess
 <code>
 	public class MyModel implements Serializable {
 		
-		// ... cutted out
+		// ... [cutted out]
 		
 		@Sync
     	private String foo;
 		
-		// ... cutted out
+		// ... [cutted out]
 		
 		public void setFoo(String foo) {
-        	MyModelMeta.get().syncFoo(this, foo);  // <<< add this !!!
+        	MyModelMeta.get().syncFoo(this, foo);  // <<< ADD THIS !!!
         	this.foo = foo;
     	}
     }
 </code>
 
-TODO:
------
-* generate meta.syncXXX(this, ...) functions for all primitives 
-* Create sync-specific blank project
-* Add junit-tests which test for models wit synced fields whether contain the meta.syncXXX(this, ...) function.
-
+If started from a [slim3-persistencejs-blank](http://github.com/rsaccon/slim3-persistencejs-blank) project, project dependencies are not required.
